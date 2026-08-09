@@ -1,0 +1,22 @@
+# Unreal Engine
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+
+# Visual Studio
+.vs/
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.user
+
+# Rider
+.idea/
+
+# Build
+*.obj
+*.pdb
+
+#Asset
+/Asset/
