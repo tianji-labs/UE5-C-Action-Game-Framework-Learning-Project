@@ -6,6 +6,13 @@
 #include "GameFramework/Character.h"
 #include "Tianji.generated.h"
 
+//ÒÆ¶¯
+class UCharacterMovementComponent;
+class UInputMappingContext;
+class UInputAction;
+struct FInputActionValue;
+
+
 UCLASS()
 class XIUXIAN_API ATianji : public ACharacter
 {
@@ -20,5 +27,20 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+
+
+private:
+/*ÒÆ¶¯*/
+	void Forward(const FInputActionValue& Value);
+	void Right(const FInputActionValue& Value);
+
+	UCharacterMovementComponent* MovementComponent;
+
+	UPROPERTY(EditDefaultsOnly,Category = "PersonalAsset|Movement")
+	UInputMappingContext* IMC_Tianji;
+	UPROPERTY(EditDefaultsOnly,Category = "PersonalAsset|Movement")
+	UInputAction* IA_Forward;
+	UPROPERTY(EditDefaultsOnly,Category = "PersonalAsset|Movement")
+	UInputAction* IA_Right;
 
 };
