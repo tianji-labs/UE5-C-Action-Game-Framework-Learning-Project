@@ -5,27 +5,34 @@
 //移动
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
-
-
 //#include "GameFramework/FloatingPawnMovement.h"
-//#include "GameFramework/CharacterMovementComponent.h"
-
+//人物旋转
+#include "GameFramework/CharacterMovementComponent.h"
 //第三人称视角
 #include"Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+//数学库（计算）
+#include "Kismet/KismetMathLibrary.h"
 
 
 ATianji::ATianji()
 {
-	//MovementComponent = GetCharacterMovement();
+
 	PrimaryActorTick.bCanEverTick = true;
 	//第三人称视角
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(RootComponent);
-	SpringArm->TargetArmLength = 300.f;
+	SpringArm->TargetArmLength = 400.f;
 	SpringArm->bUsePawnControlRotation = true;  //弹簧臂跟随玩家视角
+
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm);
+
+	//人物旋转
+	MovementComponent = GetCharacterMovement();
+	MovementComponent->bOrientRotationToMovement = true;
+	MovementComponent->RotationRate = FRotator(0.f, 360.f, 0.f);
+	bUseControllerRotationYaw = false;  //本体不随控制器转动
 
 }
 
@@ -56,14 +63,16 @@ void ATianji::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	//增强输入
 	UEnhancedInputComponent* EnhancedInput = CastChecked<UEnhancedInputComponent>(PlayerInputComponent);
 	//绑定回调
-	EnhancedInput->BindAction(IA_Forward, ETriggerEvent::Triggered, this, &ATianji::Forward);
-	EnhancedInput->BindAction(IA_Right, ETriggerEvent::Triggered, this, &ATianji::Right);
-	EnhancedInput->BindAction(IA_Jump, ETriggerEvent::Triggered, this, &ATianji::Jump);
+	EnhancedInput->BindAction(IA_Move, ETriggerEvent::Triggered, this, &ATianji::Move);
+	EnhancedInput->BindAction(IA_Move, ETriggerEvent::Completed, this, &ATianji::Release);
+	EnhancedInput->BindAction(IA_Jump, ETriggerEvent::Started, this, &ATianji::Jump);
+	EnhancedInput->BindAction(IA_Sprint, ETriggerEvent::Started, this, &ATianji::Sprint);
 	EnhancedInput->BindAction(IA_Look, ETriggerEvent::Triggered, this, &ATianji::Look);
 
 
 }
-//视角
+
+/*第三人称视角*/
 void ATianji::Look(const FInputActionValue& Value)
 {
 	FVector2D LookInput = Value.Get<FVector2D>();
@@ -76,31 +85,42 @@ void ATianji::Look(const FInputActionValue& Value)
 		AddControllerPitchInput(-LookInput.Y);
 	}
 }
-//前后
-void ATianji::Forward(const FInputActionValue& Value)
-{
-	float Val = Value.Get<float>();
-	if (Controller && Val != 0)
-	{
-		const FRotator YawRot(0, Controller->GetControlRotation().Yaw, 0);
-		const FVector ForwardDir = FRotationMatrix(YawRot).GetUnitAxis(EAxis::X);
 
-		AddMovementInput(ForwardDir, Val);
+
+
+/*移动*/
+void ATianji::Move(const FInputActionValue& Value)
+{
+	const FVector2D MovementVector = Value.Get<FVector2D>();
+
+	if (!Controller) return;
+
+	const FRotator YawRot(0, Controller->GetControlRotation().Yaw, 0);
+	const FVector ForwardDir = FRotationMatrix(YawRot).GetUnitAxis(EAxis::X);
+	const FVector RightDir = FRotationMatrix(YawRot).GetUnitAxis(EAxis::Y);
+	AddMovementInput(ForwardDir, MovementVector.X);
+	AddMovementInput(RightDir, MovementVector.Y);
+
+}
+
+void ATianji::Release(const FInputActionValue& Value)
+{
+	MovementComponent = GetCharacterMovement();
+	if (MovementComponent && UKismetMathLibrary::VSizeXY(MovementComponent->Velocity) > 0.f)
+	{
+		MovementComponent->MaxWalkSpeed = 400.f;
 	}
 }
-//左右
-void ATianji::Right(const FInputActionValue& Value)
+//冲刺
+void ATianji::Sprint()
 {
-	float Val = Value.Get<float>();
-	if (Controller && Val != 0)
+	MovementComponent = GetCharacterMovement();
+	if (MovementComponent && UKismetMathLibrary::VSizeXY(MovementComponent->Velocity) > 0.f)
 	{
-		const FRotator YawRot(0, Controller->GetControlRotation().Yaw, 0);
-		const FVector RightDir = FRotationMatrix(YawRot).GetUnitAxis(EAxis::Y);
-
-		AddMovementInput(RightDir, Val);
+		MovementComponent->MaxWalkSpeed = 600.f;
 	}
 }
-//跳跃
+
 void ATianji::Jump()
 {
 	Super::Jump();

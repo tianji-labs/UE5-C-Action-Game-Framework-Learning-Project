@@ -10,9 +10,8 @@
 class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
-//
+//人物旋转
 class UCharacterMovementComponent;
-
 //第三人称视角
 class USpringArmComponent;
 class UCameraComponent;
@@ -34,6 +33,8 @@ protected:
 
 
 private:
+/*人物旋转*/
+	UCharacterMovementComponent* MovementComponent;
 /*第三人称视角*/
 	void Look(const FInputActionValue& Value);
 
@@ -45,8 +46,9 @@ private:
 	UInputAction* IA_Look;
 
 /*移动*/
-	void Forward(const FInputActionValue& Value);
-	void Right(const FInputActionValue& Value);
+	void Move(const FInputActionValue& Value);
+	void Release(const FInputActionValue& Value);
+	void Sprint();
 	void Jump();
 
 	//UCharacterMovementComponent* MovementComponent;
@@ -54,9 +56,9 @@ private:
 	UPROPERTY(EditDefaultsOnly,Category = "PersonalAsset|Movement")
 	UInputMappingContext* IMC_Tianji;
 	UPROPERTY(EditDefaultsOnly,Category = "PersonalAsset|Movement")
-	UInputAction* IA_Forward;
+	UInputAction* IA_Move;
 	UPROPERTY(EditDefaultsOnly,Category = "PersonalAsset|Movement")
-	UInputAction* IA_Right;
+	UInputAction* IA_Sprint;
 	UPROPERTY(EditDefaultsOnly,Category = "PersonalAsset|Movement")
 	UInputAction* IA_Jump;
 
