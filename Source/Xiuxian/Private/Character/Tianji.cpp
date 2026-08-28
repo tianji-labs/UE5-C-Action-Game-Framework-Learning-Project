@@ -13,6 +13,9 @@
 #include "GameFramework/SpringArmComponent.h"
 //数学库（计算）
 #include "Kismet/KismetMathLibrary.h"
+//自
+#include "HUD/StartMenu.h"
+#include"Item/Weapon.h"
 
 
 ATianji::ATianji()
@@ -68,6 +71,8 @@ void ATianji::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	EnhancedInput->BindAction(IA_Jump, ETriggerEvent::Started, this, &ATianji::Jump);
 	EnhancedInput->BindAction(IA_Sprint, ETriggerEvent::Started, this, &ATianji::Sprint);
 	EnhancedInput->BindAction(IA_Look, ETriggerEvent::Triggered, this, &ATianji::Look);
+	EnhancedInput->BindAction(IA_Menu, ETriggerEvent::Started, this, &ATianji::Menu);
+	EnhancedInput->BindAction(IA_Pickup, ETriggerEvent::Started, this, &ATianji::Pickup);
 
 
 }
@@ -125,4 +130,28 @@ void ATianji::Jump()
 {
 	Super::Jump();
 }
+
+void ATianji::Menu()
+{
+	//广播
+	UE_LOG(LogTemp, Log, TEXT("=== Broadcast ==="));
+	OnOpenMenuRequest.Broadcast();
+}
+
+void ATianji::Pickup()
+{
+	AWeapon* OverlappingWeapon = CastChecked<AWeapon>(OverlappingItem);
+
+	PickupWeapon(OverlappingWeapon);
+}
+
+void ATianji::PickupWeapon(AWeapon* Weapon)
+{
+	if (Weapon)
+	{
+		Weapon->AttachWeapon(GetMesh(), FName("R_HandSocket"), this, this);
+		OverlappingItem = nullptr;
+	}
+}
+
 

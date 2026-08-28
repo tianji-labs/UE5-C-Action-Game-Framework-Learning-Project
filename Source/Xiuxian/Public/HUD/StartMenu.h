@@ -12,7 +12,12 @@ UCLASS()
 class XIUXIAN_API AStartMenu : public AHUD
 {
 	GENERATED_BODY()
-	
+public:
+	//½â°ó
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReson) override;
+	UFUNCTION()
+	void OpenMenu();
+
 protected:
 	virtual void BeginPlay() override;
 
