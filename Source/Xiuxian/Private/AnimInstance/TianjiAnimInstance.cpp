@@ -28,5 +28,6 @@ void UTianjiAnimInstance::NativeUpdateAnimation(float DeltaTime)
 		Velocity = MyCharacterMovement->Velocity;
 		GroundSpeed = UKismetMathLibrary::VSizeXY(Velocity);
 		IsFalling = MyCharacterMovement->IsFalling();
+		WeaponState = MyCharacter->GetWeaponState();
 	}
 }

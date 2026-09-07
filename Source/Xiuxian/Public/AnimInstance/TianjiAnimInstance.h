@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
+#include"Character/StateType.h"
 #include "TianjiAnimInstance.generated.h"
 
 
@@ -36,5 +37,6 @@ protected:
 	//地面速度
 	UPROPERTY(BlueprintReadOnly, Category = "PersonalAsset|Movement")
 	float GroundSpeed;
-
+	UPROPERTY(BlueprintReadOnly, Category = "PersonalAsset|StateType")
+	EWeaponState WeaponState;
 };

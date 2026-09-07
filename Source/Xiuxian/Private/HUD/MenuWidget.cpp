@@ -39,6 +39,7 @@ void UMenuWidget::StartGame()
 	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	if (IsValid(PC))
 	{
+		PC->SetPause(false);
 		PC->bShowMouseCursor = false;
 		FInputModeGameOnly GameMode;
 		PC->SetInputMode(GameMode);

@@ -7,6 +7,7 @@
 #include "Weapon.generated.h"
 
 class USphereComponent;
+class UBoxComponent;
 
 UCLASS()
 class XIUXIAN_API AWeapon : public AActor
@@ -22,6 +23,9 @@ public:
 	void AttachWeapon(USceneComponent* InParent, FName InSocketName, AActor* NewOwner, APawn* NewInstigator);
 
 	void AttachMeshToSocket(USceneComponent* InParent, const FName& InSocketName);
+
+	void SetSphereNocollision();
+
 protected:
 
 	virtual void BeginPlay() override;
@@ -29,10 +33,21 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	UStaticMeshComponent* MeshComponent;
 
+	//球体
 	UPROPERTY(EditDefaultsOnly)
 	USphereComponent* SphereComponent;
 
+/* 攻击 */
+	//盒组件
+	UPROPERTY(EditDefaultsOnly)
+	UBoxComponent* BoxComponent;
+	//攻击追踪
+	UPROPERTY(VisibleAnywhere)
+	USceneComponent* BoxTraceStart;
+	UPROPERTY(VisibleAnywhere)
+	USceneComponent* BoxTraceEnd;
 
+/* 重叠事件 */
 	UFUNCTION()
 	virtual void OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	UFUNCTION()

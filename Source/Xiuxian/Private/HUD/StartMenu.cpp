@@ -41,9 +41,9 @@ void AStartMenu::OpenMenu()
 	{
 		APlayerController* Controller = World->GetFirstPlayerController();
 
-		checkf(IsValid(MenuWidgetClass), TEXT("MenuWidget is nullptr"));
 		if (IsValid(Controller))
 		{
+			Controller->SetPause(true);
 			UMenuWidget* MenuWidget = CreateWidget<UMenuWidget>(Controller, MenuWidgetClass);
 			MenuWidget->AddToViewport();
 		}

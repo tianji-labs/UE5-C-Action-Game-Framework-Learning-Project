@@ -42,14 +42,7 @@ ATianji::ATianji()
 void ATianji::BeginPlay()
 {
 	Super::BeginPlay();
-	//添加映射上下文
-	if (APlayerController* PC = Cast<APlayerController>(GetController()))
-	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer()))
-		{
-			Subsystem->AddMappingContext(IMC_Tianji, 0);
-		}
-	}
+
 	
 }
 
@@ -60,7 +53,7 @@ void ATianji::Tick(float DeltaTime)
 }
 
 void ATianji::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
+{	
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	//增强输入
@@ -73,6 +66,7 @@ void ATianji::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	EnhancedInput->BindAction(IA_Look, ETriggerEvent::Triggered, this, &ATianji::Look);
 	EnhancedInput->BindAction(IA_Menu, ETriggerEvent::Started, this, &ATianji::Menu);
 	EnhancedInput->BindAction(IA_Pickup, ETriggerEvent::Started, this, &ATianji::Pickup);
+	EnhancedInput->BindAction(IA_Attack, ETriggerEvent::Started, this, &ATianji::CharacterAttack);
 
 
 }
@@ -98,7 +92,7 @@ void ATianji::Move(const FInputActionValue& Value)
 {
 	const FVector2D MovementVector = Value.Get<FVector2D>();
 
-	if (!Controller) return;
+	if (!Controller || ActionState != EActionState::EAS_Unoccupied) return;
 
 	const FRotator YawRot(0, Controller->GetControlRotation().Yaw, 0);
 	const FVector ForwardDir = FRotationMatrix(YawRot).GetUnitAxis(EAxis::X);
@@ -128,19 +122,20 @@ void ATianji::Sprint()
 
 void ATianji::Jump()
 {
+	if (ActionState != EActionState::EAS_Unoccupied) return;
 	Super::Jump();
 }
 
 void ATianji::Menu()
 {
 	//广播
-	UE_LOG(LogTemp, Log, TEXT("=== Broadcast ==="));
 	OnOpenMenuRequest.Broadcast();
 }
 
+/* 拾取 */
 void ATianji::Pickup()
 {
-	AWeapon* OverlappingWeapon = CastChecked<AWeapon>(OverlappingItem);
+	AWeapon* OverlappingWeapon = Cast<AWeapon>(OverlappingItem);
 
 	PickupWeapon(OverlappingWeapon);
 }
@@ -150,7 +145,34 @@ void ATianji::PickupWeapon(AWeapon* Weapon)
 	if (Weapon)
 	{
 		Weapon->AttachWeapon(GetMesh(), FName("R_HandSocket"), this, this);
+		WeaponState = EWeaponState::EWS_CloseCombatOneHand;
 		OverlappingItem = nullptr;
+		Weapon->SetSphereNocollision();
+	}
+}
+
+/* 攻击 */
+void ATianji::AttackEnd()
+{
+	ActionState = EActionState::EAS_Unoccupied;
+}
+
+void ATianji::CharacterAttack()
+{
+	if (ActionState == EActionState::EAS_Attacking || WeaponState == EWeaponState::EWS_Unequipped) return;
+	PlayMontageSection(AttackMontage, AttackMontageSections[0]);
+	ActionState = EActionState::EAS_Attacking;
+}
+
+//播放某段蒙太奇动画
+void ATianji::PlayMontageSection(UAnimMontage* Montage, const FName& SectionName)
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && Montage)
+	{
+		AnimInstance->Montage_JumpToSection(SectionName, Montage);
+		AnimInstance->Montage_Play(Montage); 
+
 	}
 }
 
