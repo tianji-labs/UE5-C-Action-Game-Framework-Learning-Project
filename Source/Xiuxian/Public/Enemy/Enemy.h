@@ -4,10 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Interface/GetHitInterface.h"
 #include "Enemy.generated.h"
 
+class UHealthBar;
+class UHealthBarComponent;
+
 UCLASS()
-class XIUXIAN_API AEnemy : public ACharacter
+class XIUXIAN_API AEnemy : public ACharacter , public IGetHitInterface
 {
 	GENERATED_BODY()
 
@@ -21,6 +25,15 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
+/* ÊÜ»÷ */
+	void GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter);
+	//Damage
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
+/* ÑªÌõ */
+	UPROPERTY(VisibleAnywhere, Category = "Healthy")
+	TObjectPtr<UHealthBar> HealthBar;
 
+	UPROPERTY(VisibleAnywhere, Category = "PHealthy")
+	TObjectPtr<UHealthBarComponent> HealthBarComp;
 };

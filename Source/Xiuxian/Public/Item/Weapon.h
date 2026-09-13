@@ -31,28 +31,37 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditDefaultsOnly)
-	UStaticMeshComponent* MeshComponent;
+	TObjectPtr<UStaticMeshComponent> MeshComponent;
 
 	//球体
 	UPROPERTY(EditDefaultsOnly)
-	USphereComponent* SphereComponent;
+	TObjectPtr<USphereComponent> SphereComponent;
 
 /* 攻击 */
 	//盒组件
+	UPROPERTY(EditAnywhere, Category = "Personal|Weapon")
+	FVector BoxTraceExtent = FVector(5.f);		//盒子半边长
+	UPROPERTY(EditAnywhere, Category = "Personal|Weapon")
+	bool bShowBoxDebug = false;  //是否调试绘制
 	UPROPERTY(EditDefaultsOnly)
-	UBoxComponent* BoxComponent;
+	TObjectPtr<UBoxComponent> BoxComponent;
+
 	//攻击追踪
 	UPROPERTY(VisibleAnywhere)
-	USceneComponent* BoxTraceStart;
+	TObjectPtr<USceneComponent> BoxTraceStart;
 	UPROPERTY(VisibleAnywhere)
-	USceneComponent* BoxTraceEnd;
+	TObjectPtr<USceneComponent> BoxTraceEnd;
+
+	void BoxTrace(FHitResult& HitResult);
+	void ExecuteGetHit(FHitResult& BoxHit);
 
 /* 重叠事件 */
 	UFUNCTION()
 	virtual void OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	UFUNCTION()
 	virtual void OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	UFUNCTION()
 
-
+	virtual void OnBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 };

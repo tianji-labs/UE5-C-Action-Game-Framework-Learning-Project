@@ -11,7 +11,7 @@ void AStartMenu::BeginPlay()
 	Super::BeginPlay();
 
 	//¶¯Ì¬¶à²¥Î¯ÍÐ
-	ATianji* PC = CastChecked<ATianji>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	ATianji* PC = Cast<ATianji>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 	if (IsValid(PC))
 	{
 		PC->OnOpenMenuRequest.AddDynamic(this, &AStartMenu::OpenMenu);

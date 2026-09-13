@@ -5,7 +5,12 @@
 #include"Character/Tianji.h"
 #include"Components/SphereComponent.h"
 #include"Components/BoxComponent.h"
-
+//数学运算
+#include"Kismet/KismetSystemLibrary.h"
+//受击接口
+#include"Interface/GetHitInterface.h"
+//受伤
+#include"Kismet/GameplayStatics.h"
 
 AWeapon::AWeapon()
 {
@@ -20,6 +25,10 @@ AWeapon::AWeapon()
 	//攻击
 	BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComponent"));
 	BoxComponent->SetupAttachment(GetRootComponent());
+	BoxComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	BoxComponent->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
+	BoxComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+	BoxComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 
 	BoxTraceStart = CreateDefaultSubobject<USceneComponent>(TEXT("Box Trace Start"));
 	BoxTraceStart->SetupAttachment(GetRootComponent());
@@ -32,9 +41,10 @@ AWeapon::AWeapon()
 void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
-	//球体重叠事件
+	//重叠事件
 	SphereComponent->OnComponentBeginOverlap.AddDynamic(this, &AWeapon::OnSphereBeginOverlap);
 	SphereComponent->OnComponentEndOverlap.AddDynamic(this, &AWeapon::OnSphereEndOverlap);
+	BoxComponent->OnComponentBeginOverlap.AddDynamic(this, &AWeapon::OnBoxBeginOverlap);
 }
 
 void AWeapon::Tick(float DeltaTime)
@@ -44,6 +54,39 @@ void AWeapon::Tick(float DeltaTime)
 }
 
 
+void AWeapon::BoxTrace(FHitResult& HitResult)
+{
+	const FVector Start = BoxTraceStart->GetComponentLocation();
+	const FVector End = BoxTraceEnd->GetComponentLocation();
+
+	TArray<AActor*> IgnoreActor;
+	IgnoreActor.AddUnique(this);
+	IgnoreActor.AddUnique(GetOwner());
+
+	UKismetSystemLibrary::BoxTraceSingle(
+		this,
+		Start,
+		End,
+		BoxTraceExtent,
+		BoxTraceStart->GetComponentRotation(),
+		ETraceTypeQuery::TraceTypeQuery1,
+		false,
+		IgnoreActor,
+		bShowBoxDebug ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None,
+		HitResult,
+		true
+	);
+}
+
+void AWeapon::ExecuteGetHit(FHitResult& BoxHit)
+{
+	AActor* GetHitActor = BoxHit.GetActor();
+	if (!(GetHitActor && GetHitActor->Implements<UGetHitInterface>())) return;
+	IGetHitInterface::Execute_GetHit(GetHitActor, BoxHit.ImpactPoint, GetOwner());
+
+}
+
+//重叠事件
 void AWeapon::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	ATianji* Tianji = Cast<ATianji>(OtherActor);
@@ -60,6 +103,16 @@ void AWeapon::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 	{
 		Tianji->SetOverlappingItem(nullptr);
 	}
+}
+
+void AWeapon::OnBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	FHitResult HitResult;
+	BoxTrace(HitResult);
+	ExecuteGetHit(HitResult);
+	
+	if (!IsValid(HitResult.GetActor()) || !IsValid(GetInstigator())) return;
+	UGameplayStatics::ApplyDamage(HitResult.GetActor(), 20.f, GetInstigator()->GetController(), this, UDamageType::StaticClass());
 }
 
 //拾取武器
