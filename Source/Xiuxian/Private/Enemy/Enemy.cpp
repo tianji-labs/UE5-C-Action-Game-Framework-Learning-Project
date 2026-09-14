@@ -40,7 +40,6 @@ void AEnemy::GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter)
 float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser); //×Ô¶¯¹ã²¥
-	UE_LOG(LogTemp, Warning, TEXT("TakeDamageEnd"));
 	return 0.0f;
 }
 

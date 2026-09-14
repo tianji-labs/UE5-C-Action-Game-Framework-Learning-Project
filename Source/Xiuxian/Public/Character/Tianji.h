@@ -21,13 +21,10 @@ class USpringArmComponent;
 class UCameraComponent;
 //武器
 class AWeapon;
+//combat组件
+class UCombat;
 
-UENUM(BlueprintType)
-enum class EActionState : uint8
-{
-	EAS_Unoccupied UMETA(DisplayName = "Unoccupied"),
-	EAS_Attacking UMETA(DisplayName = "Attacking")
-};
+
 
 
 UCLASS()
@@ -49,19 +46,18 @@ public:
 	AWeapon* OverlappingItem;
 
 
-
 	//UE的FORCEINLINE强制内联
 	FORCEINLINE void SetOverlappingItem(AWeapon* Item) { OverlappingItem = Item; }
-	//获取角色状态
-	FORCEINLINE EWeaponState GetWeaponState() const { return WeaponState; }
+/*状态*/
+	UFUNCTION(BlueprintCallable)
+	void SetActionState(EActionState NewState);
+	FORCEINLINE const EActionState& GetActionState() const { return ActionState; }
+	FORCEINLINE const EWeaponState& GetWeaponState() const { return WeaponState; }
 
 protected:
 	virtual void BeginPlay() override;
 
-
 private:
-
-
 /*人物旋转*/
 	UCharacterMovementComponent* MovementComponent;
 /*第三人称视角*/
@@ -114,15 +110,15 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "PersonalAsset|Montage")
 	TArray<FName> AttackMontageSections;
 
-
-	UFUNCTION(BlueprintCallable)
-	void AttackEnd();
-
 	void CharacterAttack();
 
 /* 状态 */
+	UPROPERTY(EditDefaultsOnly, Category = "PersonalAsset|Combat")
+	TObjectPtr<UCombat> Combat;
+
 	EWeaponState WeaponState = EWeaponState::EWS_Unequipped;
 	EActionState ActionState = EActionState::EAS_Unoccupied;
+
 
 /* 动画 */
 	void PlayMontageSection(UAnimMontage* Montage, const FName& SectionName);

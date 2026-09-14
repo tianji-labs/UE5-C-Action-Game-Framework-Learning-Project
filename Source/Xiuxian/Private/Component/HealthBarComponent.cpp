@@ -35,16 +35,17 @@ void UHealthBarComponent::BeginPlay()
 	if (!IsValid(GetOwner())) return;
 	GetOwner()->OnTakeAnyDamage.AddDynamic(this,&UHealthBarComponent::TakeAnyDamage);
 
-
 }
 
 void UHealthBarComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+	//不要return可能跳过销毁
+	if (IsValid(GetOwner()))
+	{
+		GetOwner()->OnTakeAnyDamage.RemoveAll(this);
+	}
+
 	Super::EndPlay(EndPlayReason);
-
-	if (!IsValid(GetOwner())) return;
-	GetOwner()->OnTakeAnyDamage.RemoveAll(this);
-
 }
 
 /* 血条UI */
@@ -83,7 +84,6 @@ void UHealthBarComponent::ReceiveDamage(float Damage)
 
 void UHealthBarComponent::TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
-	UE_LOG(LogTemp, Warning, TEXT("TakeAnyDamage"));
 	ReceiveDamage(Damage);
 	float Percent = GetHealthyPercent();
 	SetHealthBarPercent(Percent);

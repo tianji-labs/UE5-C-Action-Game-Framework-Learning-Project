@@ -15,7 +15,8 @@
 #include "Kismet/KismetMathLibrary.h"
 //自
 #include "HUD/StartMenu.h"
-#include"Item/Weapon.h"
+#include "Item/Weapon.h"
+#include "Component/Combat.h"
 
 
 ATianji::ATianji()
@@ -37,6 +38,14 @@ ATianji::ATianji()
 	MovementComponent->RotationRate = FRotator(0.f, 360.f, 0.f);
 	bUseControllerRotationYaw = false;  //本体不随控制器转动
 
+	//combat组件
+	Combat = CreateDefaultSubobject<UCombat>(TEXT("Combat"));
+
+}
+
+void ATianji::SetActionState(EActionState NewState)
+{
+	ActionState = NewState;
 }
 
 void ATianji::BeginPlay()
@@ -152,10 +161,7 @@ void ATianji::PickupWeapon(AWeapon* Weapon)
 }
 
 /* 攻击 */
-void ATianji::AttackEnd()
-{
-	ActionState = EActionState::EAS_Unoccupied;
-}
+
 
 void ATianji::CharacterAttack()
 {
