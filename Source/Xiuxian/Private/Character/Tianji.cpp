@@ -155,6 +155,8 @@ void ATianji::PickupWeapon(AWeapon* Weapon)
 		WeaponState = EWeaponState::EWS_CloseCombatOneHand;
 		OverlappingItem = nullptr;
 		Weapon->SetSphereNocollision();
+		Weapon->SetWeaponCollisionEnable(false);
+		EquipWeapon = Weapon;
 	}
 }
 
@@ -172,10 +174,14 @@ void ATianji::PlayMontageSection(UAnimMontage* Montage, const FName& SectionName
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && Montage)
 	{
-		AnimInstance->Montage_JumpToSection(SectionName, Montage);
 		AnimInstance->Montage_Play(Montage); 
-
+		AnimInstance->Montage_JumpToSection(SectionName, Montage);
 	}
+}
+
+AWeapon* ATianji::GetEquippedWeapon() const
+{
+	return EquipWeapon;
 }
 
 

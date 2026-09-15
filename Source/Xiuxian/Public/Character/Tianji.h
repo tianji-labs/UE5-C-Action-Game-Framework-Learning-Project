@@ -59,16 +59,17 @@ protected:
 
 private:
 /*人物旋转*/
-	UCharacterMovementComponent* MovementComponent;
+	UPROPERTY()
+	TObjectPtr<UCharacterMovementComponent> MovementComponent;
 /*第三人称视角*/
 	void Look(const FInputActionValue& Value);
 
-	UPROPERTY(VisibleAnywhere, Category = "PersonalAsset|Camera")
-	USpringArmComponent* SpringArm;
-	UPROPERTY(VisibleAnywhere, Category = "PersonalAsset|Camera")
-	UCameraComponent* Camera;
-	UPROPERTY(EditDefaultsOnly,Category = "PersonalAsset|Camera")
-	UInputAction* IA_Look;
+	UPROPERTY(VisibleAnywhere, Category = "Person|Camera")
+	TObjectPtr<USpringArmComponent> SpringArm;
+	UPROPERTY(VisibleAnywhere, Category = "Person|Camera")
+	TObjectPtr<UCameraComponent> Camera;
+	UPROPERTY(EditDefaultsOnly,Category = "Person|Camera")
+	TObjectPtr<UInputAction> IA_Look;
 
 /* 移动 */
 	void Move(const FInputActionValue& Value);
@@ -80,40 +81,42 @@ private:
 	//UCharacterMovementComponent* MovementComponent;
 
 
-	UPROPERTY(EditDefaultsOnly,Category = "PersonalAsset|Input")
-	UInputAction* IA_Move;
-	UPROPERTY(EditDefaultsOnly,Category = "PersonalAsset|Input")
-	UInputAction* IA_Sprint;
-	UPROPERTY(EditDefaultsOnly,Category = "PersonalAsset|Input")
-	UInputAction* IA_Jump;
+	UPROPERTY(EditDefaultsOnly,Category = "Person|Input")
+	TObjectPtr<UInputAction> IA_Move;
+	UPROPERTY(EditDefaultsOnly,Category = "Person|Input")
+	TObjectPtr<UInputAction> IA_Sprint;
+	UPROPERTY(EditDefaultsOnly,Category = "Person|Input")
+	TObjectPtr<UInputAction> IA_Jump;
 
 /* 菜单 */
 	void Menu();
 
-	UPROPERTY(EditDefaultsOnly,Category = "PersonalAsset|Input")
-	UInputAction* IA_Menu;
+	UPROPERTY(EditDefaultsOnly,Category = "Person|Input")
+	TObjectPtr<UInputAction> IA_Menu;
 
 /* 拾取 */
-	UPROPERTY(EditDefaultsOnly, Category = "PersonalAsset|Input")
-	UInputAction* IA_Pickup;
+	UPROPERTY(EditDefaultsOnly, Category = "Person|Input")
+	TObjectPtr<UInputAction> IA_Pickup;
+	UPROPERTY(VisibleAnywhere, Category = "Person|Weapon")
+	TObjectPtr<AWeapon> EquipWeapon;
 
 	void Pickup();
 	void PickupWeapon(AWeapon* Weapon);
 
 /* 攻击 */
-	UPROPERTY(EditDefaultsOnly, Category = "PersonalAsset|Input")
-	UInputAction* IA_Attack;
+	UPROPERTY(EditDefaultsOnly, Category = "Person|Input")
+	TObjectPtr<UInputAction> IA_Attack;
 
-	UPROPERTY(EditDefaultsOnly, Category = "PersonalAsset|Montage")
-	UAnimMontage* AttackMontage;
+	UPROPERTY(EditDefaultsOnly, Category = "Person|Montage")
+	TObjectPtr<UAnimMontage> AttackMontage;
 
-	UPROPERTY(EditDefaultsOnly, Category = "PersonalAsset|Montage")
+	UPROPERTY(EditDefaultsOnly, Category = "Person|Montage")
 	TArray<FName> AttackMontageSections;
 
 	void CharacterAttack();
 
 /* 状态 */
-	UPROPERTY(EditDefaultsOnly, Category = "PersonalAsset|Combat")
+	UPROPERTY(EditDefaultsOnly, Category = "Person|Combat")
 	TObjectPtr<UCombat> Combat;
 
 	EWeaponState WeaponState = EWeaponState::EWS_Unequipped;
@@ -122,4 +125,8 @@ private:
 
 /* 动画 */
 	void PlayMontageSection(UAnimMontage* Montage, const FName& SectionName);
+
+public:
+	//获取
+	AWeapon* GetEquippedWeapon() const;
 };

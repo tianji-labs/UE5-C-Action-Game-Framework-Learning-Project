@@ -33,16 +33,17 @@ void AEnemy::Tick(float DeltaTime)
 
 void AEnemy::GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter)
 {
-	GetHitAnim(ImpactPoint);
+	GetHitAnim(Hitter);
 }
 
-void AEnemy::GetHitAnim(const FVector& ImpactPoint)
+void AEnemy::GetHitAnim(AActor* Hitter)
 {
 	//获取自身单位向量
 	const FVector Forward = GetActorForwardVector();
 	//使向量处于同一平面
-	const FVector PointLowerd = FVector(ImpactPoint.X, ImpactPoint.Y, GetActorLocation().Z);
-	//获得自身到碰撞点的单位向量
+	FVector HitterLocation = Hitter->GetActorLocation();
+	const FVector PointLowerd = FVector(HitterLocation.X, HitterLocation.Y, GetActorLocation().Z);
+	//获得自身到Hitter的单位向量
 	const FVector ToHit = (PointLowerd - GetActorLocation()).GetSafeNormal();
 
 	//单位向量点积获得cos
@@ -54,7 +55,7 @@ void AEnemy::GetHitAnim(const FVector& ImpactPoint)
 	Theta = FMath::RadiansToDegrees(Theta);
 
 	//右手坐标系调整方向
-	const FVector CrossProduct = FVector::CrossProduct(ImpactPoint, ToHit);
+	const FVector CrossProduct = FVector::CrossProduct(HitterLocation, ToHit);
 	if (CrossProduct.Z < 0)
 	{
 		Theta *= -1.f;
@@ -80,8 +81,8 @@ void AEnemy::GetHitAnim(const FVector& ImpactPoint)
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (!IsValid(AnimInstance) || !IsValid(GetHitMontage)) return;
-	AnimInstance->Montage_JumpToSection(Sction, GetHitMontage);
 	AnimInstance->Montage_Play(GetHitMontage);
+	AnimInstance->Montage_JumpToSection(Sction, GetHitMontage);
 }
 
 float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)

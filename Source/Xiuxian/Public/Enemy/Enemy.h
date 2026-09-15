@@ -33,7 +33,7 @@ private:
 	FName Sction;
 
 	void GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter);
-	void GetHitAnim(const FVector& ImpactPoint);
+	void GetHitAnim(AActor* Hitter);
 	//Damage
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 

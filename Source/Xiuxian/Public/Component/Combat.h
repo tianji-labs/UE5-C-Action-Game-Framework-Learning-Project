@@ -27,4 +27,6 @@ private:
 
 	UFUNCTION()
 	void AttackEnd(FName NotifyName, const FBranchingPointNotifyPayload& BranchingPointPayload);
+	UFUNCTION()
+	void SetWeaponCollision(FName NotifyName, const FBranchingPointNotifyPayload& BranchingPointPayload);
 };

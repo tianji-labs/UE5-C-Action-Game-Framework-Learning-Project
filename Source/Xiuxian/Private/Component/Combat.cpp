@@ -5,6 +5,7 @@
 #include "AnimInstance/TianjiAnimInstance.h"
 #include "Character/StateType.h"
 #include "Character/Tianji.h"
+#include"Item/Weapon.h"
 
 
 UCombat::UCombat()
@@ -32,6 +33,7 @@ void UCombat::BeginPlay()
 
 	if (!IsValid(AnimInstance)) return;
 	AnimInstance->OnPlayMontageNotifyBegin.AddUniqueDynamic(this, &UCombat::AttackEnd); //AddUniqueDynamic避免重复绑定
+	AnimInstance->OnPlayMontageNotifyBegin.AddUniqueDynamic(this, &UCombat::SetWeaponCollision);
 
 }
 
@@ -45,7 +47,7 @@ void UCombat::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		UAnimInstance* AnimInstance = CharOwner->GetMesh()->GetAnimInstance();
 		if (IsValid(AnimInstance))
 		{
-			AnimInstance->OnPlayMontageNotifyBegin.RemoveDynamic(this, &UCombat::AttackEnd);
+			AnimInstance->OnPlayMontageNotifyBegin.RemoveAll(this);
 		}
 	}
 
@@ -54,8 +56,25 @@ void UCombat::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void UCombat::AttackEnd(FName NotifyName, const FBranchingPointNotifyPayload& BranchingPointPayload)
 {
+	if (NotifyName != FName("AttackEnd")) return;
+
 	ATianji* OwnerCharacter = Cast<ATianji>(GetOwner());
 	if (!IsValid(OwnerCharacter)) return;
 	//引用公开接口——后续可换为接口或广播
 	OwnerCharacter->SetActionState(EActionState::EAS_Unoccupied);
+}
+
+void UCombat::SetWeaponCollision(FName NotifyName, const FBranchingPointNotifyPayload& BranchingPointPayload)
+{
+	ATianji* OwnerCharacter = Cast<ATianji>(Owner);
+	if (!IsValid(OwnerCharacter) || !IsValid(OwnerCharacter->GetEquippedWeapon())) return;
+
+	if (NotifyName == FName("EnableCollision"))
+	{
+		OwnerCharacter->GetEquippedWeapon()->SetWeaponCollisionEnable(true);
+	}
+	if (NotifyName == FName("UnableCollision"))
+	{
+		OwnerCharacter->GetEquippedWeapon()->SetWeaponCollisionEnable(false);
+	}
 }

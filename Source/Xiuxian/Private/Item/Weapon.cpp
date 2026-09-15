@@ -142,3 +142,16 @@ void AWeapon::SetSphereNocollision()
 		SphereComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 }
+
+void AWeapon::SetWeaponCollisionEnable(const bool& bEnable)
+{
+	if (!IsValid(BoxComponent)) return;
+	if (bEnable)
+	{
+		BoxComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	}
+	else if(!bEnable)
+	{
+		BoxComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+}

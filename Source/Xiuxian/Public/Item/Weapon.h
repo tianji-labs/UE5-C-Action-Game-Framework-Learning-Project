@@ -26,6 +26,8 @@ public:
 
 	void SetSphereNocollision();
 
+	void SetWeaponCollisionEnable(const bool& bEnable);
+
 protected:
 
 	virtual void BeginPlay() override;
@@ -64,4 +66,6 @@ protected:
 
 	virtual void OnBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
+
+public:
 };
