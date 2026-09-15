@@ -31,7 +31,6 @@ void UCombat::BeginPlay()
 	UAnimInstance* AnimInstance = CharOwner->GetMesh()->GetAnimInstance();
 
 	if (!IsValid(AnimInstance)) return;
-	UE_LOG(LogTemp, Warning, TEXT("AddDynamic"));
 	AnimInstance->OnPlayMontageNotifyBegin.AddUniqueDynamic(this, &UCombat::AttackEnd); //AddUniqueDynamic避免重复绑定
 
 }
@@ -55,7 +54,6 @@ void UCombat::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void UCombat::AttackEnd(FName NotifyName, const FBranchingPointNotifyPayload& BranchingPointPayload)
 {
-	UE_LOG(LogTemp, Warning, TEXT("AttackEnd"));
 	ATianji* OwnerCharacter = Cast<ATianji>(GetOwner());
 	if (!IsValid(OwnerCharacter)) return;
 	//引用公开接口——后续可换为接口或广播

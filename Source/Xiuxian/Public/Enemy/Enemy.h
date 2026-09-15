@@ -9,6 +9,7 @@
 
 class UHealthBar;
 class UHealthBarComponent;
+class UAnimMontage;
 
 UCLASS()
 class XIUXIAN_API AEnemy : public ACharacter , public IGetHitInterface
@@ -26,14 +27,20 @@ protected:
 
 private:
 /* ÊÜ»÷ */
+	UPROPERTY(EditDefaultsOnly, Category = "Person|GetHit")
+	TObjectPtr<UAnimMontage> GetHitMontage;
+	UPROPERTY(VisibleAnywhere, Category = "Person")
+	FName Sction;
+
 	void GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter);
+	void GetHitAnim(const FVector& ImpactPoint);
 	//Damage
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 /* ÑªÌõ */
-	UPROPERTY(VisibleAnywhere, Category = "Healthy")
+	UPROPERTY(VisibleAnywhere, Category = "Person|Healthy")
 	TObjectPtr<UHealthBar> HealthBar;
 
-	UPROPERTY(VisibleAnywhere, Category = "PHealthy")
+	UPROPERTY(VisibleAnywhere, Category = "Person|Healthy")
 	TObjectPtr<UHealthBarComponent> HealthBarComp;
 };

@@ -94,8 +94,6 @@ void ATianji::Look(const FInputActionValue& Value)
 	}
 }
 
-
-
 /*ÒÆ¶¯*/
 void ATianji::Move(const FInputActionValue& Value)
 {
@@ -161,8 +159,6 @@ void ATianji::PickupWeapon(AWeapon* Weapon)
 }
 
 /* ¹¥»÷ */
-
-
 void ATianji::CharacterAttack()
 {
 	if (ActionState == EActionState::EAS_Attacking || WeaponState == EWeaponState::EWS_Unequipped) return;
