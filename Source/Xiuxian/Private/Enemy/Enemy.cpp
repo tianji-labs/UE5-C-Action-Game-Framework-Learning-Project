@@ -4,6 +4,9 @@
 #include "Enemy/Enemy.h"
 #include"Component/HealthBar.h"
 #include"Component/HealthBarComponent.h"
+//perception
+#include "Component/EnemyPerception.h"
+#include"Perception/AISenseConfig_Sight.h"
 //数学计算
 //#include "Kismet/KismetMathLibrary.h"
 
@@ -17,12 +20,27 @@ AEnemy::AEnemy()
 	HealthBar->SetupAttachment(GetRootComponent());
 
 
+	EnemyPerception = CreateDefaultSubobject<UEnemyPerception>(TEXT("EnemyPerception"));
+	SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig"));
+	SightConfig->SightRadius = 1500.f; //视距半径（能看多远）
+	SightConfig->LoseSightRadius = 1800.f;
+	SightConfig->PeripheralVisionAngleDegrees = 60.f;//能看到多大角度
+	//检测从属（阵营）
+	SightConfig->DetectionByAffiliation.bDetectEnemies = false;
+	SightConfig->DetectionByAffiliation.bDetectNeutrals = true; //检测中立
+	SightConfig->DetectionByAffiliation.bDetectFriendlies = false;//检测友方
+	EnemyPerception->ConfigureSense(*SightConfig);//配置感知（sense）
+	EnemyPerception->SetDominantSense(SightConfig->GetSenseImplementation());
+	/*
+	GetSenseImplementation 获得配置对应的 Sense 类型  AISense_Sight
+	SetDominantSense 把 Sense 设置为主要/主导感知类型
+	*/
 }
 
 void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	EnemyPerception->OnTargetPerceptionUpdated.AddDynamic(this, &AEnemy::OnTargetPerceptionUpdated);
 }
 
 void AEnemy::Tick(float DeltaTime)
@@ -31,9 +49,25 @@ void AEnemy::Tick(float DeltaTime)
 
 }
 
+void AEnemy::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus) //Stimulus 一份感知结果
+{
+	if (Stimulus.WasSuccessfullySensed())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Found:%s"), *Actor->GetName());
+	}
+	else if (!Stimulus.WasSuccessfullySensed())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("NoFound"));
+	}
+
+}
+
 void AEnemy::GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter)
 {
-	GetHitAnim(Hitter);
+	if (EnemyState != EEnemyState::EES_Dead)
+	{
+		GetHitAnim(Hitter);
+	}
 }
 
 void AEnemy::GetHitAnim(AActor* Hitter)
@@ -87,7 +121,17 @@ void AEnemy::GetHitAnim(AActor* Hitter)
 
 float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	if (EnemyState == EEnemyState::EES_Dead) return 0.f;
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser); //自动广播
+
+	if (IsValid(HealthBarComp))
+	{
+		if (!(HealthBarComp->IsAlive()))
+		{
+			EnemyState = EEnemyState::EES_Dead;
+		}
+	}	
+	
 	return 0.0f;
 }
 

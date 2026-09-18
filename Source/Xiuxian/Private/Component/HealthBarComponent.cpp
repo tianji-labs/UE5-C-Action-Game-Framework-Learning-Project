@@ -29,11 +29,17 @@ void UHealthBarComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 void UHealthBarComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	CreateHealthBarWidget();
+	Owner = GetOwner();
+	HealthBar = Owner->FindComponentByClass<UHealthBar>(); //查询引用自身拥有的组件
+
+	CreateHealthBarWidget(); //先初始化HealthBar
 	CurrentHealthyBar = MaxHealthyBar;
 
-	if (!IsValid(GetOwner())) return;
-	GetOwner()->OnTakeAnyDamage.AddDynamic(this,&UHealthBarComponent::TakeAnyDamage);
+	if (!IsValid(Owner)) return;
+	Owner->OnTakeAnyDamage.AddDynamic(this,&UHealthBarComponent::TakeAnyDamage);
+
+	if (!IsValid(HealthBar)) return;
+	HealthBar->SetVisibility(false);
 
 }
 
@@ -51,11 +57,6 @@ void UHealthBarComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 /* 血条UI */
 void UHealthBarComponent::CreateHealthBarWidget()
 {
-	AActor* Owner = GetOwner();
-
-	if (!IsValid(Owner)) return;
-	UHealthBar* HealthBar = Owner->FindComponentByClass<UHealthBar>(); //查询引用自身拥有的组件
-
 	if (!IsValid(HealthBarWidgetClass)) return;
 	HealthBarWidget = CreateWidget<UHealthBarWidget>(GetWorld(),HealthBarWidgetClass);  //根据指定的 Widget 类创建实际的 Widget 对象
 
@@ -87,6 +88,19 @@ void UHealthBarComponent::TakeAnyDamage(AActor* DamagedActor, float Damage, cons
 	ReceiveDamage(Damage);
 	float Percent = GetHealthyPercent();
 	SetHealthBarPercent(Percent);
+	
+	if (IsAlive())
+	{
+		HealthBar->SetVisibility(true);
+	}
+	else if(!IsAlive())
+	{
+		HealthBar->SetVisibility(false);
+	}	
+	
+
+
+
 }
 
 bool UHealthBarComponent::IsAlive()

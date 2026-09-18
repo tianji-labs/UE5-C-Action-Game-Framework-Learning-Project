@@ -10,6 +10,15 @@
 class UHealthBar;
 class UHealthBarComponent;
 class UAnimMontage;
+class UEnemyPerception;
+class UAISenseConfig_Sight;
+
+UENUM(BlueprintType)
+enum class EEnemyState : uint8
+{
+	EES_NoState UMETA(DisplayName = "NoState"),
+	EES_Dead UMETA(DisplayName = "Dead")
+};
 
 UCLASS()
 class XIUXIAN_API AEnemy : public ACharacter , public IGetHitInterface
@@ -26,10 +35,19 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
+/* 感知 */
+	UPROPERTY(VisibleAnywhere, Category = "Perception")
+	TObjectPtr<UEnemyPerception> EnemyPerception;
+	UPROPERTY(VisibleAnywhere, Category = "Perception")
+	TObjectPtr<UAISenseConfig_Sight> SightConfig;
+
+	UFUNCTION()
+	void OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
+
 /* 受击 */
-	UPROPERTY(EditDefaultsOnly, Category = "Person|GetHit")
+	UPROPERTY(EditDefaultsOnly, Category = "GetHit")
 	TObjectPtr<UAnimMontage> GetHitMontage;
-	UPROPERTY(VisibleAnywhere, Category = "Person")
+	UPROPERTY(VisibleAnywhere, Category = "Private")
 	FName Sction;
 
 	void GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter);
@@ -38,9 +56,15 @@ private:
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 /* 血条 */
-	UPROPERTY(VisibleAnywhere, Category = "Person|Healthy")
+	UPROPERTY(VisibleAnywhere, Category = "Healthy")
 	TObjectPtr<UHealthBar> HealthBar;
 
-	UPROPERTY(VisibleAnywhere, Category = "Person|Healthy")
+	UPROPERTY(VisibleAnywhere, Category = "Healthy")
 	TObjectPtr<UHealthBarComponent> HealthBarComp;
+
+/* 状态 */
+	EEnemyState EnemyState = EEnemyState::EES_NoState;
+
+public:
+
 };

@@ -27,6 +27,11 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
+/* ×é¼þ */
+	UPROPERTY()
+	TObjectPtr<AActor> Owner;
+	UPROPERTY(VisibleAnywhere, Category = "HealthBar")
+	TObjectPtr<UHealthBar> HealthBar;
 
 /* ÑªÌõUI */
 	UPROPERTY(EditDefaultsOnly, Category = "HealthBar")
