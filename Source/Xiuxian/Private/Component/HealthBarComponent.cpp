@@ -98,9 +98,6 @@ void UHealthBarComponent::TakeAnyDamage(AActor* DamagedActor, float Damage, cons
 		HealthBar->SetVisibility(false);
 	}	
 	
-
-
-
 }
 
 bool UHealthBarComponent::IsAlive()

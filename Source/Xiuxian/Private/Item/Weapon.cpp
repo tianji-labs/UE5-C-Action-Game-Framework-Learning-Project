@@ -108,11 +108,15 @@ void AWeapon::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 void AWeapon::OnBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	FHitResult HitResult;
+
+	//先处理伤害
 	BoxTrace(HitResult);
-	ExecuteGetHit(HitResult);
-	
 	if (!IsValid(HitResult.GetActor()) || !IsValid(GetInstigator())) return;
 	UGameplayStatics::ApplyDamage(HitResult.GetActor(), 20.f, GetInstigator()->GetController(), this, UDamageType::StaticClass());
+	//再处理受击
+	ExecuteGetHit(HitResult);
+	
+
 }
 
 //拾取武器

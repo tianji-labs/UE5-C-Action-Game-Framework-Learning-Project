@@ -20,6 +20,13 @@ enum class EEnemyState : uint8
 	EES_Dead UMETA(DisplayName = "Dead")
 };
 
+UENUM(BlueprintType)
+enum class EDeathPose : uint8
+{
+	EDP_DeathBack UMETA(DisplayName = "DeathBack"),
+	EDP_DeathFront UMETA(DisplayName = "DeathFront")
+};
+
 UCLASS()
 class XIUXIAN_API AEnemy : public ACharacter , public IGetHitInterface
 {
@@ -47,13 +54,20 @@ private:
 /* ÊÜ»÷ */
 	UPROPERTY(EditDefaultsOnly, Category = "GetHit")
 	TObjectPtr<UAnimMontage> GetHitMontage;
-	UPROPERTY(VisibleAnywhere, Category = "Private")
-	FName Sction;
 
 	void GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter);
 	void GetHitAnim(AActor* Hitter);
+
 	//Damage
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+
+/* ËÀÍö */
+	UPROPERTY(EditDefaultsOnly, Category = "Dead")
+	TObjectPtr<UAnimMontage> DeadMontage;
+
+
+	void DeadAnim(AActor* Hitter);
+
 
 /* ÑªÌõ */
 	UPROPERTY(VisibleAnywhere, Category = "Healthy")
@@ -62,9 +76,13 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Healthy")
 	TObjectPtr<UHealthBarComponent> HealthBarComp;
 
-/* ×´Ì¬ */
-	EEnemyState EnemyState = EEnemyState::EES_NoState;
-
+/* Í¨ÓÃ */
+	void PlaySectionMontage(FName Section, UAnimMontage* Montage);
+	double ObtainAngleForAnim(AActor* Hitter);
 public:
-
+/* ×´Ì¬ */
+	UPROPERTY(BlueprintReadOnly)
+	EEnemyState EnemyState = EEnemyState::EES_NoState;
+	UPROPERTY(BlueprintReadOnly)
+	EDeathPose DeathPose = EDeathPose::EDP_DeathBack;
 };
