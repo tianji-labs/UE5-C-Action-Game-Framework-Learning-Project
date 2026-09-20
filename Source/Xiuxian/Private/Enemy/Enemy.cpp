@@ -5,6 +5,9 @@
 #include"Component/HealthBar.h"
 #include"Component/HealthBarComponent.h"
 
+#include"AIController.h"
+#include"navigation/PathFollowingComponent.h"
+
 #include"Components/CapsuleComponent.h"
 //perception
 #include "Component/EnemyPerception.h"
@@ -27,7 +30,6 @@ AEnemy::AEnemy()
 	SightConfig->SightRadius = 1500.f; //视距半径（能看多远）
 	SightConfig->LoseSightRadius = 1800.f;
 	SightConfig->PeripheralVisionAngleDegrees = 60.f;//能看到多大角度
-	//检测从属（阵营）
 	SightConfig->DetectionByAffiliation.bDetectEnemies = false;
 	SightConfig->DetectionByAffiliation.bDetectNeutrals = true; //检测中立
 	SightConfig->DetectionByAffiliation.bDetectFriendlies = false;//检测友方
@@ -42,7 +44,8 @@ AEnemy::AEnemy()
 void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
-	EnemyPerception->OnTargetPerceptionUpdated.AddDynamic(this, &AEnemy::OnTargetPerceptionUpdated);
+
+	AIController = Cast<AAIController>(GetController());
 }
 
 void AEnemy::Tick(float DeltaTime)
@@ -51,16 +54,25 @@ void AEnemy::Tick(float DeltaTime)
 
 }
 
-void AEnemy::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus) //Stimulus 一份感知结果
+void AEnemy::StartChaseTarget(AActor* Target)
 {
-	if (Stimulus.WasSuccessfullySensed())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Found:%s"), *Actor->GetName());
-	}
-	else if (!Stimulus.WasSuccessfullySensed())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("NoFound"));
-	}
+	EnemyState = EEnemyState::EES_Chasing;
+	GetWorldTimerManager().SetTimer(ChaseTimer, FTimerDelegate::CreateUObject(this, &AEnemy::MoveToTarget, Target), 0.25f, true);
+}
+
+void AEnemy::EndChaseTarget()
+{
+	EnemyState = EEnemyState::EES_NoState;
+	GetWorldTimerManager().ClearTimer(ChaseTimer);
+}
+
+void AEnemy::MoveToTarget(AActor* Target)
+{
+	if(!IsValid(Target) || !IsValid(AIController)) return;
+	FAIMoveRequest MoveRequest;
+	MoveRequest.SetGoalActor(Target);
+	MoveRequest.SetAcceptanceRadius(50.f);
+	AIController->MoveTo(MoveRequest);
 
 }
 
@@ -75,9 +87,18 @@ void AEnemy::GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter)
 	{
 		DeadAnim(Hitter);
 		EnemyState = EEnemyState::EES_Dead;
-		if (!GetCapsuleComponent()) return;
-		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		SetLifeSpan(5.f);
+
+		if (IsValid(EnemyPerception))
+		{
+			EnemyPerception->ClearPerception();
+		}
+
+		if (IsValid(GetCapsuleComponent()))
+		{
+			GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		}
+
 	}
 }
 

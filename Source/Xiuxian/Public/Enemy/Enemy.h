@@ -12,12 +12,14 @@ class UHealthBarComponent;
 class UAnimMontage;
 class UEnemyPerception;
 class UAISenseConfig_Sight;
+class AAIController;
 
 UENUM(BlueprintType)
 enum class EEnemyState : uint8
 {
 	EES_NoState UMETA(DisplayName = "NoState"),
-	EES_Dead UMETA(DisplayName = "Dead")
+	EES_Dead UMETA(DisplayName = "Dead"),
+	EES_Chasing UMETA(DisplayName = "Chasing")
 };
 
 UENUM(BlueprintType)
@@ -42,14 +44,22 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
+/* 通用变量 */
+	UPROPERTY()
+	TObjectPtr<AAIController> AIController;
+
 /* 感知 */
+
 	UPROPERTY(VisibleAnywhere, Category = "Perception")
 	TObjectPtr<UEnemyPerception> EnemyPerception;
 	UPROPERTY(VisibleAnywhere, Category = "Perception")
 	TObjectPtr<UAISenseConfig_Sight> SightConfig;
 
-	UFUNCTION()
-	void OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
+/* 追击 */
+	FTimerHandle ChaseTimer;
+
+	void MoveToTarget(AActor* Target);
+
 
 /* 受击 */
 	UPROPERTY(EditDefaultsOnly, Category = "GetHit")
@@ -85,4 +95,8 @@ public:
 	EEnemyState EnemyState = EEnemyState::EES_NoState;
 	UPROPERTY(BlueprintReadOnly)
 	EDeathPose DeathPose = EDeathPose::EDP_DeathBack;
+
+/* Chasing */
+	void StartChaseTarget(AActor* Target);
+	void EndChaseTarget();
 };
