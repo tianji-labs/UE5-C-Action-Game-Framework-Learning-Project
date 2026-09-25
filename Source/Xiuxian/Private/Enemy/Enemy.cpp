@@ -2,29 +2,24 @@
 
 
 #include "Enemy/Enemy.h"
-#include"Component/HealthBar.h"
-#include"Component/HealthBarComponent.h"
-
-#include"AIController.h"
-#include"navigation/PathFollowingComponent.h"
-
 #include"Components/CapsuleComponent.h"
-//perception
+//移动组件
+#include "GameFramework/CharacterMovementComponent.h"
+//组件
+#include "Component/EnemyControllerComponent.h"
 #include "Component/EnemyPerception.h"
 #include"Perception/AISenseConfig_Sight.h"
-//数学计算
-//#include "Kismet/KismetMathLibrary.h"
-
+#include"Component/HealthBar.h"
+#include"Component/HealthBarComponent.h"
 
 AEnemy::AEnemy()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	HealthBarComp = CreateDefaultSubobject<UHealthBarComponent>(TEXT("HealthBarComp"));
-
+	//血条
 	HealthBar = CreateDefaultSubobject<UHealthBar>(TEXT("HealBar"));
 	HealthBar->SetupAttachment(GetRootComponent());
-
-
+	//感知
 	EnemyPerception = CreateDefaultSubobject<UEnemyPerception>(TEXT("EnemyPerception"));
 	SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig"));
 	SightConfig->SightRadius = 1500.f; //视距半径（能看多远）
@@ -39,40 +34,18 @@ AEnemy::AEnemy()
 	GetSenseImplementation 获得配置对应的 Sense 类型  AISense_Sight
 	SetDominantSense 把 Sense 设置为主要/主导感知类型
 	*/
+	EnemyControllerComponent = CreateDefaultSubobject<UEnemyControllerComponent>(TEXT("EnemyControllerComponent"));
 }
 
 void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 
-	AIController = Cast<AAIController>(GetController());
 }
 
 void AEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-}
-
-void AEnemy::StartChaseTarget(AActor* Target)
-{
-	EnemyState = EEnemyState::EES_Chasing;
-	GetWorldTimerManager().SetTimer(ChaseTimer, FTimerDelegate::CreateUObject(this, &AEnemy::MoveToTarget, Target), 0.25f, true);
-}
-
-void AEnemy::EndChaseTarget()
-{
-	EnemyState = EEnemyState::EES_NoState;
-	GetWorldTimerManager().ClearTimer(ChaseTimer);
-}
-
-void AEnemy::MoveToTarget(AActor* Target)
-{
-	if(!IsValid(Target) || !IsValid(AIController)) return;
-	FAIMoveRequest MoveRequest;
-	MoveRequest.SetGoalActor(Target);
-	MoveRequest.SetAcceptanceRadius(50.f);
-	AIController->MoveTo(MoveRequest);
 
 }
 
@@ -88,7 +61,7 @@ void AEnemy::GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter)
 		DeadAnim(Hitter);
 		EnemyState = EEnemyState::EES_Dead;
 		SetLifeSpan(5.f);
-
+		GetCharacterMovement()->bOrientRotationToMovement = false;
 		if (IsValid(EnemyPerception))
 		{
 			EnemyPerception->ClearPerception();

@@ -17,14 +17,6 @@ UHealthBarComponent::UHealthBarComponent()
 
 }
 
-//Tick
-/*
-void UHealthBarComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-}
-*/  
 
 void UHealthBarComponent::BeginPlay()
 {

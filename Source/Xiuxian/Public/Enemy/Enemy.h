@@ -13,12 +13,14 @@ class UAnimMontage;
 class UEnemyPerception;
 class UAISenseConfig_Sight;
 class AAIController;
+class UEnemyControllerComponent;
 
 UENUM(BlueprintType)
 enum class EEnemyState : uint8
 {
 	EES_NoState UMETA(DisplayName = "NoState"),
 	EES_Dead UMETA(DisplayName = "Dead"),
+	EES_Patrolling UMETA(DisplayName = "Patrolling"),
 	EES_Chasing UMETA(DisplayName = "Chasing")
 };
 
@@ -48,17 +50,18 @@ private:
 	UPROPERTY()
 	TObjectPtr<AAIController> AIController;
 
-/* 感知 */
+	UPROPERTY(VisibleAnywhere, Category = "GroundSpeed")
+	float GroundSpeed = 200.f;
 
+/* AI */
+	UPROPERTY(VisibleAnywhere, Category = "AI")
+	TObjectPtr<UEnemyControllerComponent> EnemyControllerComponent;
+
+/* 感知 */
 	UPROPERTY(VisibleAnywhere, Category = "Perception")
 	TObjectPtr<UEnemyPerception> EnemyPerception;
 	UPROPERTY(VisibleAnywhere, Category = "Perception")
 	TObjectPtr<UAISenseConfig_Sight> SightConfig;
-
-/* 追击 */
-	FTimerHandle ChaseTimer;
-
-	void MoveToTarget(AActor* Target);
 
 
 /* 受击 */
@@ -78,7 +81,6 @@ private:
 
 	void DeadAnim(AActor* Hitter);
 
-
 /* 血条 */
 	UPROPERTY(VisibleAnywhere, Category = "Healthy")
 	TObjectPtr<UHealthBar> HealthBar;
@@ -90,13 +92,13 @@ private:
 	void PlaySectionMontage(FName Section, UAnimMontage* Montage);
 	double ObtainAngleForAnim(AActor* Hitter);
 public:
+
 /* 状态 */
 	UPROPERTY(BlueprintReadOnly)
 	EEnemyState EnemyState = EEnemyState::EES_NoState;
 	UPROPERTY(BlueprintReadOnly)
 	EDeathPose DeathPose = EDeathPose::EDP_DeathBack;
 
-/* Chasing */
-	void StartChaseTarget(AActor* Target);
-	void EndChaseTarget();
+	FORCEINLINE EEnemyState GetEnemyState() const { return EnemyState; }
+	FORCEINLINE void SetEnemyState(EEnemyState NewState) { EnemyState = NewState; }
 };

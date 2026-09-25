@@ -6,6 +6,8 @@
 #include "Perception/AIPerceptionComponent.h"
 #include "EnemyPerception.generated.h"
 
+DECLARE_MULTICAST_DELEGATE_TwoParams(FPerceptionUpdated, AActor*, bool);
+
 class AEnemy;
 
 UCLASS()
@@ -20,16 +22,18 @@ protected:
 
 	virtual void BeginPlay() override;
 
-	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-
 private:
 	TObjectPtr<AEnemy> CharOwner;
 
 	UFUNCTION()
 	void HandleTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
 
+
+
 public:
 	//Çå³ý
 	void ClearPerception();
 
+	//perceptionÎ¯ÍÐÊµÀý
+	FPerceptionUpdated PerceptionUpdated;
 };

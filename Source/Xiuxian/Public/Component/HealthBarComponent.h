@@ -17,8 +17,6 @@ class XIUXIAN_API UHealthBarComponent : public UActorComponent
 public:	
 /* ππ‘Ï */
 	UHealthBarComponent();
-/* Tick */
-	//virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 protected:
 /* Begin */
