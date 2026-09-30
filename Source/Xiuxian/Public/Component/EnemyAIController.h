@@ -22,9 +22,13 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void OnPossess(APawn* InPawn) override;
 private:
+	UPROPERTY(VisibleAnywhere, Category = "Tool")
+	float MaxWalkSpeed = 200.f;
+
 
 	UPROPERTY()
 	TObjectPtr<AEnemy> Enemy;
+
 
 	UPROPERTY()
 	TObjectPtr<UEnemyControllerComponent> EnemyControllerComponent;
@@ -32,13 +36,16 @@ private:
 	UPROPERTY()	
 	TObjectPtr<AActor> PatrolTarget;
 
+
 	FTimerHandle PatrolHandle;
 
 	virtual void OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result) override;
 	//×·»÷
 	FTimerHandle ChaseTimer;
 public:
-	void MoveToTarget(AActor* Target);
+
+
+	void MoveToTarget(AActor* Target,float GroundSpeed);
 	void StartPatrolling();
 
 	//chasing

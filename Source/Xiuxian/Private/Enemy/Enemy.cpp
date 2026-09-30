@@ -22,9 +22,9 @@ AEnemy::AEnemy()
 	//感知
 	EnemyPerception = CreateDefaultSubobject<UEnemyPerception>(TEXT("EnemyPerception"));
 	SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig"));
-	SightConfig->SightRadius = 1500.f; //视距半径（能看多远）
-	SightConfig->LoseSightRadius = 1800.f;
-	SightConfig->PeripheralVisionAngleDegrees = 60.f;//能看到多大角度
+	SightConfig->SightRadius = 1000.f; //视距半径（能看多远）
+	SightConfig->LoseSightRadius = 1200.f;
+	SightConfig->PeripheralVisionAngleDegrees = 45.f;//能看到多大角度
 	SightConfig->DetectionByAffiliation.bDetectEnemies = false;
 	SightConfig->DetectionByAffiliation.bDetectNeutrals = true; //检测中立
 	SightConfig->DetectionByAffiliation.bDetectFriendlies = false;//检测友方

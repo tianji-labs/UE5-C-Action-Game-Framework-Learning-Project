@@ -5,6 +5,7 @@
 #include"Component/EnemyAIController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include"Component/EnemyPerception.h"
+#include "Component/AttributeComponent.h"
 
 
 UEnemyControllerComponent::UEnemyControllerComponent()
@@ -36,6 +37,7 @@ void UEnemyControllerComponent::ReceivePerceptionUpdated(AActor* FoundActor,bool
 	else
 	{
 		EnemyAIController->EndChaseTarget();
+		EnemyAIController->StartPatrolling();
 	}
 }
 void UEnemyControllerComponent::InitializeAI(AEnemyAIController* InEnemyAIController)
@@ -43,6 +45,11 @@ void UEnemyControllerComponent::InitializeAI(AEnemyAIController* InEnemyAIContro
 	EnemyAIController = InEnemyAIController;
 	if (!IsValid(EnemyAIController)) return;
 	EnemyAIController->StartPatrolling();
+}
+
+void UEnemyControllerComponent::UpdateBehaviorState()
+{
+
 }
 
 

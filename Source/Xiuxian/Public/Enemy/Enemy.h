@@ -50,8 +50,7 @@ private:
 	UPROPERTY()
 	TObjectPtr<AAIController> AIController;
 
-	UPROPERTY(VisibleAnywhere, Category = "GroundSpeed")
-	float GroundSpeed = 200.f;
+
 
 /* AI */
 	UPROPERTY(VisibleAnywhere, Category = "AI")
