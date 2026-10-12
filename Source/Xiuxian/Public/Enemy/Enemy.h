@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Interface/GetHitInterface.h"
+#include"Character/StateType.h"
 #include "Enemy.generated.h"
 
 class UHealthBar;
@@ -14,22 +15,8 @@ class UEnemyPerception;
 class UAISenseConfig_Sight;
 class AAIController;
 class UEnemyControllerComponent;
+class UAttributeComponent;
 
-UENUM(BlueprintType)
-enum class EEnemyState : uint8
-{
-	EES_NoState UMETA(DisplayName = "NoState"),
-	EES_Dead UMETA(DisplayName = "Dead"),
-	EES_Patrolling UMETA(DisplayName = "Patrolling"),
-	EES_Chasing UMETA(DisplayName = "Chasing")
-};
-
-UENUM(BlueprintType)
-enum class EDeathPose : uint8
-{
-	EDP_DeathBack UMETA(DisplayName = "DeathBack"),
-	EDP_DeathFront UMETA(DisplayName = "DeathFront")
-};
 
 UCLASS()
 class XIUXIAN_API AEnemy : public ACharacter , public IGetHitInterface
@@ -49,8 +36,6 @@ private:
 /* 通用变量 */
 	UPROPERTY()
 	TObjectPtr<AAIController> AIController;
-
-
 
 /* AI */
 	UPROPERTY(VisibleAnywhere, Category = "AI")
@@ -86,18 +71,15 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Healthy")
 	TObjectPtr<UHealthBarComponent> HealthBarComp;
+/* 属性*/
+	UPROPERTY(VisibleAnywhere, Category = "Attribute")
+	TObjectPtr<UAttributeComponent> AttributeComponent;
 
 /* 通用 */
 	void PlaySectionMontage(FName Section, UAnimMontage* Montage);
 	double ObtainAngleForAnim(AActor* Hitter);
-public:
-
 /* 状态 */
-	UPROPERTY(BlueprintReadOnly)
-	EEnemyState EnemyState = EEnemyState::EES_NoState;
-	UPROPERTY(BlueprintReadOnly)
 	EDeathPose DeathPose = EDeathPose::EDP_DeathBack;
-
-	FORCEINLINE EEnemyState GetEnemyState() const { return EnemyState; }
-	FORCEINLINE void SetEnemyState(EEnemyState NewState) { EnemyState = NewState; }
+public:
+	FORCEINLINE EDeathPose GetDeathPose() const { return DeathPose; }
 };

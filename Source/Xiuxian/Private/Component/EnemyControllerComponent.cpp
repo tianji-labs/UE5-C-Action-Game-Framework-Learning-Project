@@ -20,6 +20,7 @@ void UEnemyControllerComponent::BeginPlay()
 	Super::BeginPlay();
 
 	EnemyPerception = GetOwner()->GetComponentByClass<UEnemyPerception>();
+	AttributeComponent = GetOwner()->GetComponentByClass<UAttributeComponent>();
 
 	if (IsValid(EnemyPerception))
 	{
@@ -32,10 +33,14 @@ void UEnemyControllerComponent::ReceivePerceptionUpdated(AActor* FoundActor,bool
 	if (!IsValid(EnemyAIController)) return;
 	if (bSensed)
 	{
-		EnemyAIController->StartChaseTarget(FoundActor);
+		ChaseTarget = FoundActor;
+		UpdateBehaviorState();
+		EnemyAIController->StartChaseTarget(ChaseTarget);
 	}
 	else
 	{
+		ChaseTarget = nullptr;
+		UpdateBehaviorState();
 		EnemyAIController->EndChaseTarget();
 		EnemyAIController->StartPatrolling();
 	}
@@ -44,12 +49,25 @@ void UEnemyControllerComponent::InitializeAI(AEnemyAIController* InEnemyAIContro
 {
 	EnemyAIController = InEnemyAIController;
 	if (!IsValid(EnemyAIController)) return;
+	UpdateBehaviorState();
+	UE_LOG(LogTemp, Warning, TEXT("InitializeAI"));
 	EnemyAIController->StartPatrolling();
 }
 
 void UEnemyControllerComponent::UpdateBehaviorState()
 {
-
+	if (AttributeComponent->IsDead())
+	{
+		AttributeComponent->ChangeBehaviorState(EEnemyState::EES_Dead);
+	}
+	else if(IsValid(ChaseTarget))
+	{
+		AttributeComponent->ChangeBehaviorState(EEnemyState::EES_Chasing);
+	}
+	else
+	{
+		AttributeComponent->ChangeBehaviorState(EEnemyState::EES_Patrolling);
+	}
 }
 
 

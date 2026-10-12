@@ -11,6 +11,7 @@
 #include"Perception/AISenseConfig_Sight.h"
 #include"Component/HealthBar.h"
 #include"Component/HealthBarComponent.h"
+#include"Component/AttributeComponent.h"
 
 AEnemy::AEnemy()
 {
@@ -35,6 +36,10 @@ AEnemy::AEnemy()
 	SetDominantSense 把 Sense 设置为主要/主导感知类型
 	*/
 	EnemyControllerComponent = CreateDefaultSubobject<UEnemyControllerComponent>(TEXT("EnemyControllerComponent"));
+	UE_LOG(LogTemp, Warning, TEXT("EnemyControllerComponent created"));
+
+	//属性
+	AttributeComponent = CreateDefaultSubobject<UAttributeComponent>(TEXT("AttributeComp"));
 }
 
 void AEnemy::BeginPlay()
@@ -59,7 +64,10 @@ void AEnemy::GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter)
 	else
 	{
 		DeadAnim(Hitter);
-		EnemyState = EEnemyState::EES_Dead;
+		if (IsValid(AttributeComponent))
+		{
+			AttributeComponent->ChangeBehaviorState(EEnemyState::EES_Dead);
+		}
 		SetLifeSpan(5.f);
 		GetCharacterMovement()->bOrientRotationToMovement = false;
 		if (IsValid(EnemyPerception))
@@ -104,9 +112,8 @@ void AEnemy::GetHitAnim(AActor* Hitter)
 
 float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	if (EnemyState == EEnemyState::EES_Dead) return 0.f;
+	if (!IsValid(AttributeComponent)||AttributeComponent->GetEnemyState()==EEnemyState::EES_Dead) return 0.f;
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser); //自动广播
-
 	return 0.0f;
 }
 

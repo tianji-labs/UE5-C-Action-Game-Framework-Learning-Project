@@ -4,6 +4,7 @@
 #include "Component/EnemyAIController.h"
 
 #include "Component/EnemyControllerComponent.h"
+#include"Component/AttributeComponent.h"
 //Enemy
 #include"Enemy/Enemy.h"
 //移动
@@ -14,40 +15,39 @@
 void AEnemyAIController::BeginPlay()
 {
 	Super::BeginPlay();
-
-	Enemy = Cast<AEnemy>(GetPawn());
-	if(Enemy->GetCharacterMovement())
-	{
-		Enemy->GetCharacterMovement()->bOrientRotationToMovement = true;
-	}
-	if(Enemy)
-	{
-		EnemyControllerComponent = Enemy->FindComponentByClass<UEnemyControllerComponent>();
-	}
 }
 
 void AEnemyAIController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 	GetWorldTimerManager().ClearTimer(PatrolHandle);
-	Enemy->GetWorldTimerManager().ClearTimer(ChaseTimer);
+	GetWorldTimerManager().ClearTimer(ChaseTimer);
 }
 
 void AEnemyAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
+
 	Enemy = Cast<AEnemy>(InPawn);
-	if(IsValid(EnemyControllerComponent))
-	{
-		EnemyControllerComponent->InitializeAI(this);
-	}
+
+	if(!IsValid(Enemy)) return;
+	EnemyControllerComponent = Enemy->FindComponentByClass<UEnemyControllerComponent>();
+	AttributeComponent = Enemy->FindComponentByClass<UAttributeComponent>();
+
+	if (!IsValid(EnemyControllerComponent)) return;
+	EnemyControllerComponent->InitializeAI(this);
+
+	if(!IsValid(Enemy->GetCharacterMovement())) return;
+	Enemy->GetCharacterMovement()->bOrientRotationToMovement = true;
+
 }
 
 void AEnemyAIController::StartPatrolling()
 {
+	if(!IsValid(EnemyControllerComponent)) return;
 	TArray<TObjectPtr<AActor>> PatrolPoints = EnemyControllerComponent->GetPatrolPoints();
+
 	if (PatrolPoints.Num() == 0 || !IsValid(Enemy)) return;
-	Enemy->SetEnemyState(EEnemyState::EES_Patrolling);
 	if (!IsValid(Enemy) || !Enemy->GetCharacterMovement()) return;
 	Enemy->GetCharacterMovement()->MaxWalkSpeed = 200.f;
 	PatrolTarget = PatrolPoints[FMath::RandRange(0, PatrolPoints.Num() - 1)];
@@ -61,7 +61,7 @@ void AEnemyAIController::OnMoveCompleted(FAIRequestID RequestID, const FPathFoll
 {
 	Super::OnMoveCompleted(RequestID, Result);
 
-	if (IsValid(Enemy) && Enemy->GetEnemyState() == EEnemyState::EES_Patrolling)
+	if (IsValid(AttributeComponent) && AttributeComponent->GetEnemyState() == EEnemyState::EES_Patrolling)
 	{
 		//延迟2秒后再次开始巡逻
 		GetWorldTimerManager().SetTimer(PatrolHandle, this, &AEnemyAIController::StartPatrolling, 2.0f, false);
@@ -85,7 +85,6 @@ void AEnemyAIController::MoveToTarget(AActor* Target, float GroundSpeed)
 void AEnemyAIController::StartChaseTarget(AActor* Target)
 {
 	if (!IsValid(Enemy)) return;
-	Enemy->SetEnemyState(EEnemyState::EES_Chasing);
 	MaxWalkSpeed = 400.f;
 	//持续追击
 	FTimerDelegate MoveDel = FTimerDelegate::CreateUObject(this, &AEnemyAIController::MoveToTarget, Target, MaxWalkSpeed);

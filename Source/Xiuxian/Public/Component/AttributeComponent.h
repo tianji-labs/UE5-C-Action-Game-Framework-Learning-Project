@@ -3,7 +3,9 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include"Character/StateType.h"
 #include "AttributeComponent.generated.h"
+
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -18,6 +20,9 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
+	//×´Ì¬
+	UPROPERTY(VisibleAnywhere, Category = "Attribute")
+	EEnemyState EnemyState = EEnemyState::EES_NoState;
 	//ÑªÌõ
 	UPROPERTY(EditAnywhere, Category = "Attribute")
 	float MaxHealth = 100.f;
@@ -34,11 +39,17 @@ public:
 	FORCEINLINE float GetCurrentHealth() const { return CurrentHealth; }
 	//AI
 	FORCEINLINE float GetMaxSpeed() const { return MaxSpeed; }
-
+	//×´Ì¬
+	UFUNCTION(BlueprintCallable, Category = "Attribute")
+	FORCEINLINE EEnemyState GetEnemyState() const { return EnemyState; }
 /* ÉèÖÃ */
 	//ÑªÌõ
 	FORCEINLINE void SetMaxHealth(float NewMaxHealth) { MaxHealth = NewMaxHealth; }
 	//AI
 	FORCEINLINE void SetMaxSpeed(float NewMaxSpeed) { MaxSpeed = NewMaxSpeed; }
+	//×´Ì¬
+	FORCEINLINE void ChangeBehaviorState(EEnemyState NewState) { EnemyState = NewState; }
+/* ÅÐ¶¨ */
+	FORCEINLINE bool IsDead() const { return CurrentHealth <= 0.f; }
 
 };

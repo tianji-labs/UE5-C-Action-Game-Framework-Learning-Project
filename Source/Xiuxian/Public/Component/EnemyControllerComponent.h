@@ -8,6 +8,7 @@
 class AEnemyAIController;
 class UEnemyPerception;
 class AEnemy;
+class UAttributeComponent;
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -31,7 +32,10 @@ private:
 	TObjectPtr<AEnemyAIController> EnemyAIController;
 	UPROPERTY()
 	TObjectPtr<UEnemyPerception> EnemyPerception;
-
+	UPROPERTY()
+	TObjectPtr<UAttributeComponent> AttributeComponent;
+	UPROPERTY()
+	TObjectPtr<AActor> ChaseTarget;
 	void ReceivePerceptionUpdated(AActor* FoundActor,bool bSensed);
 
 public:	

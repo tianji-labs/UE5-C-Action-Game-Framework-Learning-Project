@@ -9,6 +9,7 @@
 struct FTimerHandle;
 class AEnemy;
 class UEnemyControllerComponent;
+class UAttributeComponent;
 struct FTimerHandle;
 
 UCLASS()
@@ -32,6 +33,8 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<UEnemyControllerComponent> EnemyControllerComponent;
+	UPROPERTY()
+	TObjectPtr<UAttributeComponent> AttributeComponent;
 
 	UPROPERTY()	
 	TObjectPtr<AActor> PatrolTarget;
