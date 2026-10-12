@@ -34,12 +34,11 @@ void AEnemyAIController::OnPossess(APawn* InPawn)
 	EnemyControllerComponent = Enemy->FindComponentByClass<UEnemyControllerComponent>();
 	AttributeComponent = Enemy->FindComponentByClass<UAttributeComponent>();
 
-	if (!IsValid(EnemyControllerComponent)) return;
-	EnemyControllerComponent->InitializeAI(this);
-
 	if(!IsValid(Enemy->GetCharacterMovement())) return;
 	Enemy->GetCharacterMovement()->bOrientRotationToMovement = true;
 
+	if (!IsValid(EnemyControllerComponent)) return;
+	EnemyControllerComponent->InitializeAI(this);
 }
 
 void AEnemyAIController::StartPatrolling()

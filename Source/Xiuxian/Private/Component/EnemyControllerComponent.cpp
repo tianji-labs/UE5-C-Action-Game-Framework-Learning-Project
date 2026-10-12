@@ -19,8 +19,10 @@ void UEnemyControllerComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	EnemyPerception = GetOwner()->GetComponentByClass<UEnemyPerception>();
-	AttributeComponent = GetOwner()->GetComponentByClass<UAttributeComponent>();
+	AActor* Owner = GetOwner();
+	if (!IsValid(Owner)) return;
+	EnemyPerception = Owner->GetComponentByClass<UEnemyPerception>();
+	AttributeComponent = Owner->GetComponentByClass<UAttributeComponent>();
 
 	if (IsValid(EnemyPerception))
 	{
@@ -48,14 +50,21 @@ void UEnemyControllerComponent::ReceivePerceptionUpdated(AActor* FoundActor,bool
 void UEnemyControllerComponent::InitializeAI(AEnemyAIController* InEnemyAIController)
 {
 	EnemyAIController = InEnemyAIController;
-	if (!IsValid(EnemyAIController)) return;
+	//确保AttributeComponent有效并且更新行为状态
+	if (!IsValid(AttributeComponent))
+	{
+		AttributeComponent = GetOwner()->FindComponentByClass<UAttributeComponent>();
+	}
+	if (!IsValid(AttributeComponent)) return;
 	UpdateBehaviorState();
-	UE_LOG(LogTemp, Warning, TEXT("InitializeAI"));
+	//确保EnemyAIController有效并且处于巡逻状态然后开始巡逻
+	if (!IsValid(EnemyAIController) && AttributeComponent->GetEnemyState() != EEnemyState::EES_Patrolling) return;
 	EnemyAIController->StartPatrolling();
 }
 
 void UEnemyControllerComponent::UpdateBehaviorState()
 {
+	if (!IsValid(AttributeComponent)) return;
 	if (AttributeComponent->IsDead())
 	{
 		AttributeComponent->ChangeBehaviorState(EEnemyState::EES_Dead);
