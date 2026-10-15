@@ -75,7 +75,7 @@ void AEnemyAIController::MoveToTarget(AActor* Target, float GroundSpeed)
 	//创建移动请求
 	FAIMoveRequest MoveRequest;
 	MoveRequest.SetGoalActor(Target);
-	MoveRequest.SetAcceptanceRadius(100.f);
+	MoveRequest.SetAcceptanceRadius(130.f);
 	//移动到目标
 	MoveTo(MoveRequest);
 

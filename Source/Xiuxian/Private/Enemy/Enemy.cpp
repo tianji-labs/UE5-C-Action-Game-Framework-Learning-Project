@@ -36,7 +36,6 @@ AEnemy::AEnemy()
 	SetDominantSense 把 Sense 设置为主要/主导感知类型
 	*/
 	EnemyControllerComponent = CreateDefaultSubobject<UEnemyControllerComponent>(TEXT("EnemyControllerComponent"));
-	UE_LOG(LogTemp, Warning, TEXT("EnemyControllerComponent created"));
 
 	//属性
 	AttributeComponent = CreateDefaultSubobject<UAttributeComponent>(TEXT("AttributeComp"));
@@ -68,8 +67,13 @@ void AEnemy::GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter)
 		{
 			AttributeComponent->ChangeBehaviorState(EEnemyState::EES_Dead);
 		}
+
 		SetLifeSpan(5.f);
+
 		GetCharacterMovement()->bOrientRotationToMovement = false;
+		GetCharacterMovement()->bUseControllerDesiredRotation = false;
+		bUseControllerRotationYaw = false;
+
 		if (IsValid(EnemyPerception))
 		{
 			EnemyPerception->ClearPerception();
@@ -79,7 +83,6 @@ void AEnemy::GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter)
 		{
 			GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		}
-
 	}
 }
 

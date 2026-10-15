@@ -47,6 +47,7 @@ void UEnemyControllerComponent::ReceivePerceptionUpdated(AActor* FoundActor,bool
 		EnemyAIController->StartPatrolling();
 	}
 }
+
 void UEnemyControllerComponent::InitializeAI(AEnemyAIController* InEnemyAIController)
 {
 	EnemyAIController = InEnemyAIController;
