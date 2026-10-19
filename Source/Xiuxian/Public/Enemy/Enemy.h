@@ -16,6 +16,8 @@ class UAISenseConfig_Sight;
 class AAIController;
 class UEnemyControllerComponent;
 class UAttributeComponent;
+class USphereComponent;
+struct FTimerHandle;
 
 
 UCLASS()
@@ -47,6 +49,14 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Perception")
 	TObjectPtr<UAISenseConfig_Sight> SightConfig;
 
+/* ¹¥»÷ */
+	UPROPERTY(VisibleAnywhere, Category = "Attack")
+	TObjectPtr<USphereComponent> AttackRangeSphere; 
+	UPROPERTY(EditDefaultsOnly, Category = "Attack")
+	TObjectPtr<UAnimMontage> AttackMontage;
+	FTimerHandle AttackHandle;
+
+	void PlayAttackMontage();
 
 /* ÊÜ»÷ */
 	UPROPERTY(EditDefaultsOnly, Category = "GetHit")
@@ -54,14 +64,12 @@ private:
 
 	void GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter);
 	void GetHitAnim(AActor* Hitter);
-
 	//Damage
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 /* ËÀÍö */
 	UPROPERTY(EditDefaultsOnly, Category = "Dead")
 	TObjectPtr<UAnimMontage> DeadMontage;
-
 
 	void DeadAnim(AActor* Hitter);
 
@@ -80,6 +88,12 @@ private:
 	double ObtainAngleForAnim(AActor* Hitter);
 /* ×´Ì¬ */
 	EDeathPose DeathPose = EDeathPose::EDP_DeathBack;
+
+
 public:
+/* ¹¥»÷ */ 
+	void Attack(AActor* Target);
+	void StopAttack();
+
 	FORCEINLINE EDeathPose GetDeathPose() const { return DeathPose; }
 };

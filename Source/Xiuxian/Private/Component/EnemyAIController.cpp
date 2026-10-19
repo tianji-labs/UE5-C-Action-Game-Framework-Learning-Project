@@ -24,6 +24,8 @@ void AEnemyAIController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	GetWorldTimerManager().ClearTimer(ChaseTimer);
 }
 
+
+//控制器接管时调用
 void AEnemyAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
@@ -41,20 +43,42 @@ void AEnemyAIController::OnPossess(APawn* InPawn)
 	EnemyControllerComponent->InitializeAI(this);
 }
 
+
+/* 巡逻 */
 void AEnemyAIController::StartPatrolling()
 {
-	if(!IsValid(EnemyControllerComponent)) return;
-	TArray<TObjectPtr<AActor>> PatrolPoints = EnemyControllerComponent->GetPatrolPoints();
-
-	if (PatrolPoints.Num() == 0 || !IsValid(Enemy)) return;
 	if (!IsValid(Enemy) || !Enemy->GetCharacterMovement()) return;
 	Enemy->GetCharacterMovement()->MaxWalkSpeed = 200.f;
-	PatrolTarget = PatrolPoints[FMath::RandRange(0, PatrolPoints.Num() - 1)];
+
+	//随机选点
+	if(!IsValid(EnemyControllerComponent)) return;
+	PatrolTarget = ChoosePatrolTarget(EnemyControllerComponent->GetPatrolPoints());
+
 	//随机移动到一个巡逻点
+	if (!IsValid(PatrolTarget)) return;
 	MoveToLocation(PatrolTarget->GetActorLocation(), 100.f, true, true, true, false, 0, true);
-	//MoveToTarget(PatrolTarget, MaxWalkSpeed);
+
 }
 
+
+TObjectPtr<AActor> AEnemyAIController::ChoosePatrolTarget(const TArray<TObjectPtr<AActor>>& PatrolPoints)
+{
+	TArray<TObjectPtr<AActor>> RemainingPatrolPoints;
+
+	for (TObjectPtr<AActor> PatrolPoint : PatrolPoints)
+	{
+		if (PatrolPoint != PatrolTarget)
+		{
+			RemainingPatrolPoints.AddUnique(PatrolPoint);
+		}
+	}
+	if (RemainingPatrolPoints.Num() > 0)
+	{
+		int32 Index = FMath::RandRange(0, RemainingPatrolPoints.Num() - 1);
+		return RemainingPatrolPoints[Index];
+	}
+	return nullptr;
+}
 //这次AI移动请求结束后会调用这个函数
 void AEnemyAIController::OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result)
 {
@@ -65,6 +89,17 @@ void AEnemyAIController::OnMoveCompleted(FAIRequestID RequestID, const FPathFoll
 		//延迟2秒后再次开始巡逻
 		GetWorldTimerManager().SetTimer(PatrolHandle, this, &AEnemyAIController::StartPatrolling, 2.0f, false);
 	}
+}
+
+
+/* 追击 */
+void AEnemyAIController::StartChaseTarget(AActor* Target)
+{
+	if (!IsValid(Enemy)) return;
+	MaxWalkSpeed = 400.f;
+	//持续追击
+	FTimerDelegate MoveDel = FTimerDelegate::CreateUObject(this, &AEnemyAIController::MoveToTarget, Target, MaxWalkSpeed);
+	GetWorldTimerManager().SetTimer(ChaseTimer, MoveDel, 0.25f, true);
 }
 
 void AEnemyAIController::MoveToTarget(AActor* Target, float GroundSpeed)
@@ -79,15 +114,6 @@ void AEnemyAIController::MoveToTarget(AActor* Target, float GroundSpeed)
 	//移动到目标
 	MoveTo(MoveRequest);
 
-}
-
-void AEnemyAIController::StartChaseTarget(AActor* Target)
-{
-	if (!IsValid(Enemy)) return;
-	MaxWalkSpeed = 400.f;
-	//持续追击
-	FTimerDelegate MoveDel = FTimerDelegate::CreateUObject(this, &AEnemyAIController::MoveToTarget, Target, MaxWalkSpeed);
-	GetWorldTimerManager().SetTimer(ChaseTimer, MoveDel, 0.25f, true);
 }
 
 void AEnemyAIController::EndChaseTarget()

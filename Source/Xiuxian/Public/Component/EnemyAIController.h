@@ -26,33 +26,33 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Tool")
 	float MaxWalkSpeed = 200.f;
 
-
 	UPROPERTY()
 	TObjectPtr<AEnemy> Enemy;
-
 
 	UPROPERTY()
 	TObjectPtr<UEnemyControllerComponent> EnemyControllerComponent;
 	UPROPERTY()
 	TObjectPtr<UAttributeComponent> AttributeComponent;
 
+/* Ñ²Âß */ 
 	UPROPERTY()	
 	TObjectPtr<AActor> PatrolTarget;
-
 
 	FTimerHandle PatrolHandle;
 
 	virtual void OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result) override;
-	//×·»÷
+/* ×·»÷ */ 
 	FTimerHandle ChaseTimer;
-public:
-
 
 	void MoveToTarget(AActor* Target,float GroundSpeed);
+public:
+/* Ñ²Âß */
+	//¿ªÊ¼Ñ²Âß
 	void StartPatrolling();
+	TObjectPtr<AActor> ChoosePatrolTarget(const TArray<TObjectPtr<AActor>>& PatrolPoints);
 
-	//chasing
+
+/* ×·»÷ */
 	void StartChaseTarget(AActor* Target);
 	void EndChaseTarget();
-
 };

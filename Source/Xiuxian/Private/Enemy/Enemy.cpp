@@ -5,6 +5,7 @@
 #include"Components/CapsuleComponent.h"
 //移动组件
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Components/SphereComponent.h"
 //组件
 #include "Component/EnemyControllerComponent.h"
 #include "Component/EnemyPerception.h"
@@ -36,21 +37,45 @@ AEnemy::AEnemy()
 	SetDominantSense 把 Sense 设置为主要/主导感知类型
 	*/
 	EnemyControllerComponent = CreateDefaultSubobject<UEnemyControllerComponent>(TEXT("EnemyControllerComponent"));
-
 	//属性
 	AttributeComponent = CreateDefaultSubobject<UAttributeComponent>(TEXT("AttributeComp"));
+	//攻击范围
+	AttackRangeSphere = CreateDefaultSubobject<USphereComponent>(TEXT("AttackRangeSphere"));
+	AttackRangeSphere->SetupAttachment(GetRootComponent());
+	AttackRangeSphere->InitSphereRadius(130.f);
+	
 }
 
 void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 
+	
 }
 
 void AEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void AEnemy::Attack(AActor* Target)
+{
+	if (!IsValid(AttributeComponent)) return;
+	//处于攻击状态
+	AttributeComponent->ChangeBehaviorState(EEnemyState::EES_Attacking);
+	//循环攻击
+	GetWorldTimerManager().SetTimer(AttackHandle, this, &AEnemy::PlayAttackMontage, 1.f, true);
+}
+
+void AEnemy::StopAttack()
+{
+	GetWorldTimerManager().ClearTimer(AttackHandle);
+}
+
+void AEnemy::PlayAttackMontage()
+{
+	PlayAnimMontage(AttackMontage);
 }
 
 void AEnemy::GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter)

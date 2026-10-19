@@ -52,4 +52,5 @@ public:
 /* ÅÐ¶¨ */
 	FORCEINLINE bool IsDead() const { return CurrentHealth <= 0.f; }
 
+
 };
