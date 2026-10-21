@@ -57,7 +57,6 @@ void AEnemyAIController::StartPatrolling()
 	//随机移动到一个巡逻点
 	if (!IsValid(PatrolTarget)) return;
 	MoveToLocation(PatrolTarget->GetActorLocation(), 100.f, true, true, true, false, 0, true);
-
 }
 
 

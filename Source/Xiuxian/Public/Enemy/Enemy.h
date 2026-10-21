@@ -55,7 +55,11 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Attack")
 	TObjectPtr<UAnimMontage> AttackMontage;
 	FTimerHandle AttackHandle;
+	//¹¥»÷½áÊøÎ¯ÍÐ
+	FOnMontageEnded EndDelegate;
+	bool bIsAttackInProgress;
 
+	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 	void PlayAttackMontage();
 
 /* ÊÜ»÷ */
@@ -95,5 +99,6 @@ public:
 	void Attack(AActor* Target);
 	void StopAttack();
 
+	FORCEINLINE bool IsAttackInProgress() const { return bIsAttackInProgress; }
 	FORCEINLINE EDeathPose GetDeathPose() const { return DeathPose; }
 };

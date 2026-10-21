@@ -56,8 +56,13 @@ void UEnemyControllerComponent::ReceivePerceptionUpdated(AActor* FoundActor,bool
 
 void UEnemyControllerComponent::OnAttackRangeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	if (!IsValid(ChaseTarget)) return;
 	if (!IsValid(AttributeComponent) || AttributeComponent->IsDead()) return;
+	if (!IsValid(OtherActor) || OtherActor == GetOwner()) return;
 
+	//检测类型为character的actor
+	ACharacter* Character = Cast<ACharacter>(OtherActor);
+	if (!IsValid(Character)) return;
 	AttackTarget = OtherActor;
 
 	UpdateBehaviorState();
@@ -67,6 +72,8 @@ void UEnemyControllerComponent::OnAttackRangeEndOverlap(UPrimitiveComponent* Ove
 {
 	if (!IsValid(AttributeComponent) || AttributeComponent->IsDead()) return;
 
+	ACharacter* Character = Cast<ACharacter>(OtherActor);
+	if (!IsValid(Character)) return;
 	AttackTarget = nullptr;
 
 	UpdateBehaviorState();
@@ -124,6 +131,7 @@ void UEnemyControllerComponent::ChangeEnemyState(EEnemyState NewState)
 bool UEnemyControllerComponent::CanChangeState(EEnemyState NewState)
 {
 	EEnemyState EnemyState = AttributeComponent->GetEnemyState();
+	AEnemy* Enemy = Cast<AEnemy>(Owner);
 	if (EnemyState == EEnemyState::EES_Dead)
 	{
 		return false;
@@ -133,6 +141,8 @@ bool UEnemyControllerComponent::CanChangeState(EEnemyState NewState)
 	{
 		return true;
 	}
+
+	if(NewState == EEnemyState::EES_Attacking && Enemy->IsAttackInProgress()) return false;
 
 	bool bCanChange = false;
 	switch (EnemyState)

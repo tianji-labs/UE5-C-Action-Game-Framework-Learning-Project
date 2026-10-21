@@ -42,7 +42,7 @@ AEnemy::AEnemy()
 	//¹¥»÷·¶Î§
 	AttackRangeSphere = CreateDefaultSubobject<USphereComponent>(TEXT("AttackRangeSphere"));
 	AttackRangeSphere->SetupAttachment(GetRootComponent());
-	AttackRangeSphere->InitSphereRadius(130.f);
+	AttackRangeSphere->InitSphereRadius(200.f);
 	
 }
 
@@ -50,6 +50,9 @@ void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 
+	EndDelegate.BindUObject(this, &AEnemy::OnAttackMontageEnded);
+
+	GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, AttackMontage);
 	
 }
 
@@ -65,7 +68,9 @@ void AEnemy::Attack(AActor* Target)
 	//´¦ÓÚ¹¥»÷×´Ì¬
 	AttributeComponent->ChangeBehaviorState(EEnemyState::EES_Attacking);
 	//Ñ­»·¹¥»÷
-	GetWorldTimerManager().SetTimer(AttackHandle, this, &AEnemy::PlayAttackMontage, 1.f, true);
+	GetWorldTimerManager().SetTimer(AttackHandle, this, &AEnemy::PlayAttackMontage, 2.f, true);
+
+
 }
 
 void AEnemy::StopAttack()
@@ -73,9 +78,17 @@ void AEnemy::StopAttack()
 	GetWorldTimerManager().ClearTimer(AttackHandle);
 }
 
+void AEnemy::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	bIsAttackInProgress = false;
+
+	EnemyControllerComponent->UpdateBehaviorState();
+}
+
 void AEnemy::PlayAttackMontage()
 {
 	PlayAnimMontage(AttackMontage);
+	bIsAttackInProgress = true;
 }
 
 void AEnemy::GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter)
