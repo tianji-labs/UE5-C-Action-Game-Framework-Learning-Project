@@ -59,6 +59,11 @@ void AEnemyAIController::StartPatrolling()
 	MoveToLocation(PatrolTarget->GetActorLocation(), 100.f, true, true, true, false, 0, true);
 }
 
+void AEnemyAIController::EndPatrolling()
+{
+	GetWorldTimerManager().ClearTimer(PatrolHandle);
+}
+
 
 TObjectPtr<AActor> AEnemyAIController::ChoosePatrolTarget(const TArray<TObjectPtr<AActor>>& PatrolPoints)
 {

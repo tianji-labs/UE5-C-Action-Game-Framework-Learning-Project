@@ -49,6 +49,7 @@ public:
 /* Ñ²Âß */
 	//¿ªÊ¼Ñ²Âß
 	void StartPatrolling();
+	void EndPatrolling();
 	TObjectPtr<AActor> ChoosePatrolTarget(const TArray<TObjectPtr<AActor>>& PatrolPoints);
 
 

@@ -50,10 +50,7 @@ void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 
-	EndDelegate.BindUObject(this, &AEnemy::OnAttackMontageEnded);
 
-	GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, AttackMontage);
-	
 }
 
 void AEnemy::Tick(float DeltaTime)
@@ -64,36 +61,49 @@ void AEnemy::Tick(float DeltaTime)
 
 void AEnemy::Attack(AActor* Target)
 {
-	if (!IsValid(AttributeComponent)) return;
-	//´¦ÓÚ¹¥»÷×´Ì¬
-	AttributeComponent->ChangeBehaviorState(EEnemyState::EES_Attacking);
-	//Ñ­»·¹¥»÷
-	GetWorldTimerManager().SetTimer(AttackHandle, this, &AEnemy::PlayAttackMontage, 2.f, true);
-
-
+	GetWorldTimerManager().SetTimer(AttackHandle, this, &AEnemy::PlayAttackMontage, 1.f, false);
 }
 
 void AEnemy::StopAttack()
 {
+	UE_LOG(LogTemp, Warning, TEXT("Stop Attack"));
 	GetWorldTimerManager().ClearTimer(AttackHandle);
 }
 
 void AEnemy::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
+	UE_LOG(LogTemp, Warning,
+		TEXT("Montage ended: %s | Interrupted: %d"),
+		*GetNameSafe(Montage),
+		bInterrupted);
 	bIsAttackInProgress = false;
+
+	GetWorldTimerManager().SetTimer(AttackHandle, this, &AEnemy::PlayAttackMontage, 1.f, false);
 
 	EnemyControllerComponent->UpdateBehaviorState();
 }
 
 void AEnemy::PlayAttackMontage()
 {
-	PlayAnimMontage(AttackMontage);
+	if (!IsValid(AttackMontage)) return;
+	if(!IsValid(GetMesh())|| !IsValid(GetMesh()->GetAnimInstance())) return;
+
+	const float PlayLength = PlayAnimMontage(AttackMontage);
+	UE_LOG(LogTemp, Warning,
+		TEXT("PlayAttackMontage: Length = %.2f"),
+		PlayLength);
+	if (PlayLength <= 0.f) return;
+
 	bIsAttackInProgress = true;
+
+	EndDelegate.BindUObject(this, &AEnemy::OnAttackMontageEnded);
+
+	GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, AttackMontage);
 }
 
 void AEnemy::GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter)
 {
-	if (HealthBarComp->IsAlive())
+	if (!AttributeComponent->IsDead())
 	{
 		GetHitAnim(Hitter);
 
@@ -103,7 +113,8 @@ void AEnemy::GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter)
 		DeadAnim(Hitter);
 		if (IsValid(AttributeComponent))
 		{
-			AttributeComponent->ChangeBehaviorState(EEnemyState::EES_Dead);
+			UE_LOG(LogTemp, Warning, TEXT("Enemy Dead UpdateBehaviorState"));
+			EnemyControllerComponent->UpdateBehaviorState();
 		}
 
 		SetLifeSpan(5.f);
@@ -121,6 +132,7 @@ void AEnemy::GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter)
 		{
 			GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		}
+		
 	}
 }
 

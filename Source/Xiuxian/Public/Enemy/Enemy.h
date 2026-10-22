@@ -57,6 +57,7 @@ private:
 	FTimerHandle AttackHandle;
 	//¹¥»÷½áÊøÎ¯ÍÐ
 	FOnMontageEnded EndDelegate;
+	UPROPERTY(VisibleAnywhere, Category = "Observe")
 	bool bIsAttackInProgress;
 
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);

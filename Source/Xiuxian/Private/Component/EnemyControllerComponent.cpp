@@ -97,6 +97,7 @@ void UEnemyControllerComponent::UpdateBehaviorState()
 	if (!IsValid(AttributeComponent)) return;
 	if (AttributeComponent->IsDead())
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Enemy is dead, changing state to Dead."));
 		ChangeEnemyState(EEnemyState::EES_Dead);
 	}
 	else if(IsValid(AttackTarget))
@@ -142,7 +143,7 @@ bool UEnemyControllerComponent::CanChangeState(EEnemyState NewState)
 		return true;
 	}
 
-	if(NewState == EEnemyState::EES_Attacking && Enemy->IsAttackInProgress()) return false;
+	if(EnemyState == EEnemyState::EES_Attacking && Enemy->IsAttackInProgress()) return false;
 
 	bool bCanChange = false;
 	switch (EnemyState)
@@ -184,6 +185,8 @@ void UEnemyControllerComponent::ExitState(EEnemyState OldState)
 	}
 	case EEnemyState::EES_Patrolling:
 	{
+		if (!IsValid(EnemyAIController)) return;
+		EnemyAIController->EndPatrolling();
 		return;
 	}
 	case EEnemyState::EES_Chasing:
@@ -209,6 +212,10 @@ void UEnemyControllerComponent::EnterState(EEnemyState NewState)
 {
 	switch (NewState)
 	{
+	case EEnemyState::EES_Dead:
+	{
+		return;
+	}
 	case EEnemyState::EES_NoState:
 	{
 		return;
@@ -230,6 +237,7 @@ void UEnemyControllerComponent::EnterState(EEnemyState NewState)
 		if (!IsValid(Owner)) return;
 		AEnemy* Enemy = Cast<AEnemy>(Owner);
 		if (!IsValid(Enemy)) return;
+
 		Enemy->Attack(AttackTarget);
 		return;
 	}

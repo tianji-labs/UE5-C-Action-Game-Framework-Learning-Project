@@ -8,6 +8,7 @@
 
 class UHealthBarWidget;
 class UHealthBar;
+class UAttributeComponent;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class XIUXIAN_API UHealthBarComponent : public UActorComponent
@@ -30,6 +31,8 @@ private:
 	TObjectPtr<AActor> Owner;
 	UPROPERTY(VisibleAnywhere, Category = "HealthBar")
 	TObjectPtr<UHealthBar> HealthBar;
+	UPROPERTY(VisibleAnywhere, Category = "HealthBar")
+	TWeakObjectPtr<UAttributeComponent> AttributeComponent;
 
 /* 血条UI */
 	UPROPERTY(EditDefaultsOnly, Category = "HealthBar")
@@ -39,13 +42,8 @@ private:
 
 	void CreateHealthBarWidget();
 
-/*血条属性*/
-	UPROPERTY(EditAnywhere, Category = "HealthBar")
-	float MaxHealthyBar = 100.f;
-	UPROPERTY(VisibleAnywhere, Category = "HealthBar")
-	float CurrentHealthyBar = 100.f;
-
 /* 血条百分比 */
+	bool bIsDead = false;
 
 	float GetHealthyPercent();
 	void SetHealthBarPercent(float Percent);
@@ -55,8 +53,6 @@ private:
 	UFUNCTION()
 	void TakeAnyDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 
-public:
-	bool IsAlive();
 
 
 
