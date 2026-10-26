@@ -97,7 +97,6 @@ void UEnemyControllerComponent::UpdateBehaviorState()
 	if (!IsValid(AttributeComponent)) return;
 	if (AttributeComponent->IsDead())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Enemy is dead, changing state to Dead."));
 		ChangeEnemyState(EEnemyState::EES_Dead);
 	}
 	else if(IsValid(AttackTarget))
@@ -236,8 +235,8 @@ void UEnemyControllerComponent::EnterState(EEnemyState NewState)
 	{
 		if (!IsValid(Owner)) return;
 		AEnemy* Enemy = Cast<AEnemy>(Owner);
-		if (!IsValid(Enemy)) return;
 
+		if (!IsValid(Enemy)) return;
 		Enemy->Attack(AttackTarget);
 		return;
 	}

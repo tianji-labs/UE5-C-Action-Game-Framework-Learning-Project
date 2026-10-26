@@ -57,7 +57,9 @@ private:
 	FTimerHandle AttackHandle;
 	//¹¥»÷½áÊøÎ¯ÍÐ
 	FOnMontageEnded EndDelegate;
-	UPROPERTY(VisibleAnywhere, Category = "Observe")
+	UPROPERTY(EditAnywhere, Category = "Attack")
+	double AttackRadius = 200.f;
+	UPROPERTY()
 	bool bIsAttackInProgress;
 
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
@@ -99,6 +101,7 @@ public:
 /* ¹¥»÷ */ 
 	void Attack(AActor* Target);
 	void StopAttack();
+	bool InTargetRange(AActor* Target, double Radius);
 
 	FORCEINLINE bool IsAttackInProgress() const { return bIsAttackInProgress; }
 	FORCEINLINE EDeathPose GetDeathPose() const { return DeathPose; }

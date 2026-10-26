@@ -61,6 +61,8 @@ private:
 	void EnterState(EEnemyState NewState);
 public:	
 	FORCEINLINE TArray<TObjectPtr<AActor>> GetPatrolPoints() const { return PatrolPoints; }
+	FORCEINLINE void SetAttackTarget(AActor* NewAttackTarget) { AttackTarget = NewAttackTarget; }
+	FORCEINLINE void SetChaseTarget(AActor* NewChaseTarget) { ChaseTarget = NewChaseTarget; }
 
 	void InitializeAI(AEnemyAIController* InEnemyAIController);
 
@@ -68,6 +70,8 @@ public:
 
 /* ÓÐÏÞ×´Ì¬»ú */
 	void ChangeEnemyState(EEnemyState NewState);
+
+
 
 
 };

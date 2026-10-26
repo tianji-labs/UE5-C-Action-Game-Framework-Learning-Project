@@ -42,7 +42,7 @@ AEnemy::AEnemy()
 	//¹¥»÷·¶Î§
 	AttackRangeSphere = CreateDefaultSubobject<USphereComponent>(TEXT("AttackRangeSphere"));
 	AttackRangeSphere->SetupAttachment(GetRootComponent());
-	AttackRangeSphere->InitSphereRadius(200.f);
+	AttackRangeSphere->InitSphereRadius(AttackRadius);
 	
 }
 
@@ -66,21 +66,25 @@ void AEnemy::Attack(AActor* Target)
 
 void AEnemy::StopAttack()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Stop Attack"));
 	GetWorldTimerManager().ClearTimer(AttackHandle);
+}
+
+bool AEnemy::InTargetRange(AActor* Target, double Radius)
+{
+	float Distance = FVector::Distance(GetActorLocation(), Target->GetActorLocation());
+	return Distance <= Radius;
 }
 
 void AEnemy::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	UE_LOG(LogTemp, Warning,
-		TEXT("Montage ended: %s | Interrupted: %d"),
-		*GetNameSafe(Montage),
-		bInterrupted);
 	bIsAttackInProgress = false;
 
+	if (!IsValid(EnemyControllerComponent)) return;
+	EnemyControllerComponent->UpdateBehaviorState();
+
+	if (IsValid(AttributeComponent) && AttributeComponent->IsDead()) return;
 	GetWorldTimerManager().SetTimer(AttackHandle, this, &AEnemy::PlayAttackMontage, 1.f, false);
 
-	EnemyControllerComponent->UpdateBehaviorState();
 }
 
 void AEnemy::PlayAttackMontage()
@@ -89,10 +93,6 @@ void AEnemy::PlayAttackMontage()
 	if(!IsValid(GetMesh())|| !IsValid(GetMesh()->GetAnimInstance())) return;
 
 	const float PlayLength = PlayAnimMontage(AttackMontage);
-	UE_LOG(LogTemp, Warning,
-		TEXT("PlayAttackMontage: Length = %.2f"),
-		PlayLength);
-	if (PlayLength <= 0.f) return;
 
 	bIsAttackInProgress = true;
 
@@ -106,14 +106,24 @@ void AEnemy::GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter)
 	if (!AttributeComponent->IsDead())
 	{
 		GetHitAnim(Hitter);
-
+		if (!IsValid(EnemyControllerComponent)) return;
+		if(InTargetRange(Hitter, AttackRadius))
+		{
+			EnemyControllerComponent->SetChaseTarget(Hitter);
+			EnemyControllerComponent->SetAttackTarget(Hitter);
+			EnemyControllerComponent->UpdateBehaviorState();
+		}
+		else
+		{
+			EnemyControllerComponent->SetChaseTarget(Hitter);
+			EnemyControllerComponent->UpdateBehaviorState();
+		}
 	}
 	else
 	{
 		DeadAnim(Hitter);
 		if (IsValid(AttributeComponent))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Enemy Dead UpdateBehaviorState"));
 			EnemyControllerComponent->UpdateBehaviorState();
 		}
 
