@@ -56,10 +56,10 @@ private:
 	TObjectPtr<UAnimMontage> AttackMontage;
 	FTimerHandle AttackHandle;
 	//¹¥»÷½áÊøÎ¯ÍÐ
-	FOnMontageEnded EndDelegate;
+	FOnMontageEnded AttackEndDelegate;
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	double AttackRadius = 200.f;
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, Category = "Observer")
 	bool bIsAttackInProgress;
 
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
@@ -69,6 +69,9 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "GetHit")
 	TObjectPtr<UAnimMontage> GetHitMontage;
 
+	//FOnMontageEnded GetHitEndDelegate;
+
+	//void OnGetHitMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 	void GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter);
 	void GetHitAnim(AActor* Hitter);
 	//Damage

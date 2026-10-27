@@ -61,6 +61,7 @@ void AEnemy::Tick(float DeltaTime)
 
 void AEnemy::Attack(AActor* Target)
 {
+	//SetActorRotation((Target->GetActorLocation() - GetActorLocation()).Rotation());
 	GetWorldTimerManager().SetTimer(AttackHandle, this, &AEnemy::PlayAttackMontage, 1.f, false);
 }
 
@@ -96,9 +97,10 @@ void AEnemy::PlayAttackMontage()
 
 	bIsAttackInProgress = true;
 
-	EndDelegate.BindUObject(this, &AEnemy::OnAttackMontageEnded);
+	AttackEndDelegate.BindUObject(this, &AEnemy::OnAttackMontageEnded);
 
-	GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, AttackMontage);
+	if(!IsValid(GetMesh()) || !IsValid(GetMesh()->GetAnimInstance())) return;
+	GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(AttackEndDelegate, AttackMontage);
 }
 
 void AEnemy::GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter)
@@ -106,6 +108,12 @@ void AEnemy::GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter)
 	if (!AttributeComponent->IsDead())
 	{
 		GetHitAnim(Hitter);
+
+		//GetHitEndDelegate.BindUObject(this, &AEnemy::OnGetHitMontageEnded);
+
+		//if (!IsValid(GetMesh()) || !IsValid(GetMesh()->GetAnimInstance())) return;
+		//GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(GetHitEndDelegate, GetHitMontage);
+
 		if (!IsValid(EnemyControllerComponent)) return;
 		if(InTargetRange(Hitter, AttackRadius))
 		{
@@ -172,6 +180,11 @@ void AEnemy::GetHitAnim(AActor* Hitter)
 
 	PlaySectionMontage(Section, GetHitMontage);
 }
+
+//void AEnemy::OnGetHitMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+//{
+//	SetActorRotation()
+//}
 
 float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {

@@ -63,6 +63,7 @@ void UEnemyControllerComponent::OnAttackRangeBeginOverlap(UPrimitiveComponent* O
 	//检测类型为character的actor
 	ACharacter* Character = Cast<ACharacter>(OtherActor);
 	if (!IsValid(Character)) return;
+
 	AttackTarget = OtherActor;
 
 	UpdateBehaviorState();
