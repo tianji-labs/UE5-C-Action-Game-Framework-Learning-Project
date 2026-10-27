@@ -63,6 +63,8 @@ public:
 	FORCEINLINE TArray<TObjectPtr<AActor>> GetPatrolPoints() const { return PatrolPoints; }
 	FORCEINLINE void SetAttackTarget(AActor* NewAttackTarget) { AttackTarget = NewAttackTarget; }
 	FORCEINLINE void SetChaseTarget(AActor* NewChaseTarget) { ChaseTarget = NewChaseTarget; }
+	FORCEINLINE TObjectPtr<AActor> GetChaseTarget() const { return ChaseTarget; }
+	FORCEINLINE TObjectPtr<AActor> GetAttackTarget() const { return AttackTarget; }
 
 	void InitializeAI(AEnemyAIController* InEnemyAIController);
 
