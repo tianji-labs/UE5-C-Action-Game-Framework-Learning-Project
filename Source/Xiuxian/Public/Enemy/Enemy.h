@@ -17,6 +17,7 @@ class AAIController;
 class UEnemyControllerComponent;
 class UAttributeComponent;
 class USphereComponent;
+class AWeapon;
 struct FTimerHandle;
 
 
@@ -69,9 +70,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "GetHit")
 	TObjectPtr<UAnimMontage> GetHitMontage;
 
-	//FOnMontageEnded GetHitEndDelegate;
 
-	//void OnGetHitMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 	void GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter);
 	void GetHitAnim(AActor* Hitter);
 	//Damage
@@ -93,6 +92,13 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Attribute")
 	TObjectPtr<UAttributeComponent> AttributeComponent;
 
+/* ÎäÆ÷ */
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	TSubclassOf<AWeapon> WeaponClass;
+	TObjectPtr<AWeapon> DeafaultWeapon;
+
+	void EquipDefaultWeapon();
+	void SetWeaponCollidion(FName NotifyName, const FBranchingPointNotifyPayload& BranchingPointPayload);
 /* Í¨ÓÃ */
 	void PlaySectionMontage(FName Section, UAnimMontage* Montage);
 	double ObtainAngleForAnim(AActor* Hitter);
@@ -104,8 +110,10 @@ public:
 /* ¹¥»÷ */ 
 	void Attack(AActor* Target);
 	void StopAttack();
+	void Die();
 	bool InTargetRange(AActor* Target, double Radius);
 
 	FORCEINLINE bool IsAttackInProgress() const { return bIsAttackInProgress; }
 	FORCEINLINE EDeathPose GetDeathPose() const { return DeathPose; }
+	FORCEINLINE AWeapon* GetDeafaultWeapon() const { return DeafaultWeapon; }
 };

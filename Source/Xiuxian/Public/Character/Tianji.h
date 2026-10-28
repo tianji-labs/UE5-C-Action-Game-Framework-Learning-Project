@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 //状态类型
 #include "StateType.h"
+#include "Interface/GetHitInterface.h"
 #include "Tianji.generated.h"
 //定义委托
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnOpenMenuRequest);
@@ -25,10 +26,8 @@ class AWeapon;
 class UCombat;
 
 
-
-
 UCLASS()
-class XIUXIAN_API ATianji : public ACharacter
+class XIUXIAN_API ATianji : public ACharacter, public IGetHitInterface
 {
 	GENERATED_BODY()
 
@@ -77,10 +76,6 @@ private:
 	void Sprint();
 	void Jump();
 
-
-	//UCharacterMovementComponent* MovementComponent;
-
-
 	UPROPERTY(EditDefaultsOnly,Category = "Person|Input")
 	TObjectPtr<UInputAction> IA_Move;
 	UPROPERTY(EditDefaultsOnly,Category = "Person|Input")
@@ -115,6 +110,13 @@ private:
 
 	void CharacterAttack();
 
+/* 受击 */
+	UPROPERTY(EditDefaultsOnly, Category = "Montage")
+	TObjectPtr<UAnimMontage> GetHitMontage;
+
+	void GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter);
+	void GetHitAnim(AActor* Hitter);
+	double ObtainAngleForAnim(AActor* Hitter);
 /* 状态 */
 	UPROPERTY(EditDefaultsOnly, Category = "Person|Combat")
 	TObjectPtr<UCombat> Combat;
@@ -125,7 +127,7 @@ private:
 
 /* 动画 */
 	void PlayMontageSection(UAnimMontage* Montage, const FName& SectionName);
-
+	void PlaySectionMontage(FName Section, UAnimMontage* Montage);
 public:
 	//获取
 	AWeapon* GetEquippedWeapon() const;

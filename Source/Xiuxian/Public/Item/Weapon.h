@@ -20,7 +20,7 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 	//
-	void AttachWeapon(USceneComponent* InParent, FName InSocketName, AActor* NewOwner, APawn* NewInstigator);
+	void Equip(USceneComponent* InParent, FName InSocketName, AActor* NewOwner, APawn* NewInstigator);
 
 	void AttachMeshToSocket(USceneComponent* InParent, const FName& InSocketName);
 
@@ -68,4 +68,5 @@ protected:
 
 
 public:
+	void SetBoxNoCollision();
 };

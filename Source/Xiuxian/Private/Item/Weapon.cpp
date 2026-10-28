@@ -86,6 +86,7 @@ void AWeapon::ExecuteGetHit(FHitResult& BoxHit)
 
 }
 
+
 //重叠事件
 void AWeapon::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
@@ -119,8 +120,13 @@ void AWeapon::OnBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor
 
 }
 
+void AWeapon::SetBoxNoCollision()
+{
+	BoxComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
 //拾取武器
-void AWeapon::AttachWeapon(USceneComponent* InParent, FName InSocketName, AActor* NewOwner, APawn* NewInstigator)
+void AWeapon::Equip(USceneComponent* InParent, FName InSocketName, AActor* NewOwner, APawn* NewInstigator)
 {
 	//拾取
 	AttachMeshToSocket(InParent, InSocketName);

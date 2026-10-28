@@ -7,6 +7,7 @@
 #include "Component/EnemyPerception.h"
 #include "Component/AttributeComponent.h"
 #include "Components/SphereComponent.h"
+#include "Item/Weapon.h"
 #include "Enemy/Enemy.h"
 
 
@@ -214,6 +215,10 @@ void UEnemyControllerComponent::EnterState(EEnemyState NewState)
 	{
 	case EEnemyState::EES_Dead:
 	{
+		if (!IsValid(Owner)) return;
+		AEnemy* Enemy = Cast<AEnemy>(Owner);
+		if (!IsValid(Enemy)) return;
+		Enemy->Die();
 		return;
 	}
 	case EEnemyState::EES_NoState:

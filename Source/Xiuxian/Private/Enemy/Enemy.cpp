@@ -2,17 +2,21 @@
 
 
 #include "Enemy/Enemy.h"
-#include"Components/CapsuleComponent.h"
 //移动组件
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/SphereComponent.h"
 //组件
+#include"Components/CapsuleComponent.h"
 #include "Component/EnemyControllerComponent.h"
 #include "Component/EnemyPerception.h"
 #include"Perception/AISenseConfig_Sight.h"
 #include"Component/HealthBar.h"
 #include"Component/HealthBarComponent.h"
 #include"Component/AttributeComponent.h"
+//武器
+#include"Item/Weapon.h"
+//动画
+#include"AnimInstance/EnemyAnimInstance.h"
 
 AEnemy::AEnemy()
 {
@@ -50,7 +54,12 @@ void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 
+	Tags.Add(FName("Enemy"));
 
+	EquipDefaultWeapon();
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	AnimInstance->OnPlayMontageNotifyBegin.AddUniqueDynamic(this, &AEnemy::SetWeaponCollidion);
 }
 
 void AEnemy::Tick(float DeltaTime)
@@ -80,6 +89,7 @@ void AEnemy::StopAttack()
 {
 	GetWorldTimerManager().ClearTimer(AttackHandle);
 }
+
 
 void AEnemy::PlayAttackMontage()
 {
@@ -125,28 +135,37 @@ void AEnemy::GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter)
 	else
 	{
 		DeadAnim(Hitter);
-		if (IsValid(AttributeComponent))
-		{
-			EnemyControllerComponent->UpdateBehaviorState();
-		}
-
-		SetLifeSpan(5.f);
-
-		GetCharacterMovement()->bOrientRotationToMovement = false;
-		GetCharacterMovement()->bUseControllerDesiredRotation = false;
-		bUseControllerRotationYaw = false;
-
-		if (IsValid(EnemyPerception))
-		{
-			EnemyPerception->ClearPerception();
-		}
-
-		if (IsValid(GetCapsuleComponent()))
-		{
-			GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		}
-		
+		if (!IsValid(EnemyControllerComponent)) return;
+		EnemyControllerComponent->UpdateBehaviorState();
 	}
+}
+
+void AEnemy::Die()
+{
+
+	if (IsValid(AttributeComponent))
+	{
+		EnemyControllerComponent->UpdateBehaviorState();
+	}
+
+	SetLifeSpan(5.f);
+
+	GetCharacterMovement()->bOrientRotationToMovement = false;
+	GetCharacterMovement()->bUseControllerDesiredRotation = false;
+	bUseControllerRotationYaw = false;
+
+	if (IsValid(EnemyPerception))
+	{
+		EnemyPerception->ClearPerception();
+	}
+
+	if (IsValid(GetCapsuleComponent()))
+	{
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+
+	DeafaultWeapon->SetBoxNoCollision();
+	DeafaultWeapon->SetLifeSpan(5.f);
 }
 
 void AEnemy::GetHitAnim(AActor* Hitter)
@@ -231,6 +250,32 @@ double AEnemy::ObtainAngleForAnim(AActor* Hitter)
 	return Theta;
 }
 
+/* 武器 */
+void AEnemy::EquipDefaultWeapon()
+{
+	UWorld* World = GetWorld();
+	if (World && IsValid(WeaponClass))
+	{
+		DeafaultWeapon = World->SpawnActor<AWeapon>(WeaponClass);
+		DeafaultWeapon->Equip(GetMesh(), FName("RightHandWeapon"), this, this);
+	}
+}
+
+void AEnemy::SetWeaponCollidion(FName NotifyName, const FBranchingPointNotifyPayload& BranchingPointPayload)
+{
+
+	if (!IsValid(DeafaultWeapon)) return;
+
+	if (NotifyName == FName("EnableCollision"))
+	{
+		DeafaultWeapon->SetWeaponCollisionEnable(true);
+	}
+	if (NotifyName == FName("UnableCollision"))
+	{
+		DeafaultWeapon->SetWeaponCollisionEnable(false);
+	}
+}
+/* 通用 */
 void AEnemy::PlaySectionMontage(FName Section, UAnimMontage* Montage)
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
