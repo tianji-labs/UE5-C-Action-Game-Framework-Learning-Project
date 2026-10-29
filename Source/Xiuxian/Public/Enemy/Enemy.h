@@ -98,6 +98,7 @@ private:
 	TObjectPtr<AWeapon> DeafaultWeapon;
 
 	void EquipDefaultWeapon();
+	UFUNCTION()
 	void SetWeaponCollidion(FName NotifyName, const FBranchingPointNotifyPayload& BranchingPointPayload);
 /* Õ®”√ */
 	void PlaySectionMontage(FName Section, UAnimMontage* Montage);

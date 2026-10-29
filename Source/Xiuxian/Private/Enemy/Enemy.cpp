@@ -59,7 +59,9 @@ void AEnemy::BeginPlay()
 	EquipDefaultWeapon();
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (!IsValid(AnimInstance)) return;
 	AnimInstance->OnPlayMontageNotifyBegin.AddUniqueDynamic(this, &AEnemy::SetWeaponCollidion);
+
 }
 
 void AEnemy::Tick(float DeltaTime)
@@ -258,16 +260,17 @@ void AEnemy::EquipDefaultWeapon()
 	{
 		DeafaultWeapon = World->SpawnActor<AWeapon>(WeaponClass);
 		DeafaultWeapon->Equip(GetMesh(), FName("RightHandWeapon"), this, this);
+		DeafaultWeapon->SetSphereNocollision();
 	}
 }
 
 void AEnemy::SetWeaponCollidion(FName NotifyName, const FBranchingPointNotifyPayload& BranchingPointPayload)
 {
-
 	if (!IsValid(DeafaultWeapon)) return;
 
 	if (NotifyName == FName("EnableCollision"))
 	{
+
 		DeafaultWeapon->SetWeaponCollisionEnable(true);
 	}
 	if (NotifyName == FName("UnableCollision"))
