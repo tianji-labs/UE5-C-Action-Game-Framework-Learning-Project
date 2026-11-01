@@ -171,7 +171,6 @@ void ATianji::CharacterAttack()
 /* Κά»χ */
 void ATianji::GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter)
 {
-	UE_LOG(LogTemp,Warning,TEXT("Gethit"))
 	GetHitAnim(Hitter);
 }
 
