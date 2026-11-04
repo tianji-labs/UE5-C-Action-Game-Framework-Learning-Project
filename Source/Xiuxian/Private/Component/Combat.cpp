@@ -26,13 +26,13 @@ void UCombat::BeginPlay()
 
 /*监听通知*/
 	Owner = GetOwner();
-	ACharacter* CharOwner = Cast<ACharacter>(Owner);
+	if (!IsValid(Owner)) return;
+	Tianji = Cast<ATianji>(Owner);
 
-	if (!IsValid(CharOwner) || !IsValid(CharOwner->GetMesh())) return;
-	UAnimInstance* AnimInstance = CharOwner->GetMesh()->GetAnimInstance();
+	if (!IsValid(Tianji) || !IsValid(Tianji->GetMesh())) return;
+	UAnimInstance* AnimInstance = Tianji->GetMesh()->GetAnimInstance();
 
 	if (!IsValid(AnimInstance)) return;
-	AnimInstance->OnPlayMontageNotifyBegin.AddUniqueDynamic(this, &UCombat::AttackEnd); //AddUniqueDynamic避免重复绑定
 	AnimInstance->OnPlayMontageNotifyBegin.AddUniqueDynamic(this, &UCombat::SetWeaponCollision);
 
 }
@@ -54,14 +54,31 @@ void UCombat::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 }
 
-void UCombat::AttackEnd(FName NotifyName, const FBranchingPointNotifyPayload& BranchingPointPayload)
+/* 攻击 */
+void UCombat::HandleAttack()
 {
-	if (NotifyName != FName("AttackEnd")) return;
+	if (IsValid(Tianji) && Tianji->GetWeaponState() == EWeaponState::EWS_Unequipped) return;
 
-	ATianji* OwnerCharacter = Cast<ATianji>(GetOwner());
-	if (!IsValid(OwnerCharacter)) return;
-	//引用公开接口——后续可换为接口或广播
-	OwnerCharacter->SetActionState(EActionState::EAS_Unoccupied);
+	ChangeCombatState(EPlayerCombatState::EPCS_Attacking);
+}
+
+
+void UCombat::PlayAttackMontage()
+{
+	PlayMontageSection(AttackMontage, AttackMontageSections[0]);
+
+	AttackEndDelegate.BindUObject(this, &UCombat::OnAttackMontageEnded);
+
+	if(!IsValid(Tianji) || !IsValid(Tianji->GetMesh()) || !IsValid(Tianji->GetMesh()->GetAnimInstance())) return;
+	Tianji->GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(AttackEndDelegate, AttackMontage);
+}
+
+void UCombat::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	if (bInterrupted == false)
+	{
+		PlayerCombatState = EPlayerCombatState::EPCS_Unoccupied;
+	}
 }
 
 void UCombat::SetWeaponCollision(FName NotifyName, const FBranchingPointNotifyPayload& BranchingPointPayload)
@@ -77,4 +94,200 @@ void UCombat::SetWeaponCollision(FName NotifyName, const FBranchingPointNotifyPa
 	{
 		OwnerCharacter->GetEquippedWeapon()->SetWeaponCollisionEnable(false);
 	}
+}
+
+/* 受击 */
+void UCombat::HandleGetHit(AActor* Hitter)
+{
+	PlayGetHitMontage(Hitter);
+	ChangeCombatState(EPlayerCombatState::EPCS_HitReact);
+}
+
+void UCombat::PlayGetHitMontage(AActor* Hitter)
+{
+
+	const double Theta = ObtainAngleForAnim(Hitter);
+
+	FName Section = FName("FromBack");
+
+	if (Theta < 45.f && Theta > -45.f)
+	{
+		Section = FName("FromFront");
+	}
+	else if (Theta < -135.f && Theta > 135.f)
+	{
+		Section = FName("FromBack");
+	}
+	else if (Theta <= -45.f && Theta >= -135.f)
+	{
+		Section = FName("FromLeft");
+	}
+	else if (Theta <= 135.f && Theta >= 45.f)
+	{
+		Section = FName("FromRight");
+	}
+
+	if (!IsValid(GetHitMontage)) return;
+	PlayMontageSection(GetHitMontage, Section);
+
+	GetHitEndDelegate.BindUObject(this, &UCombat::OnGetHitMontageEnded);
+
+	if (!IsValid(Tianji) || !IsValid(Tianji->GetMesh()) || !IsValid(Tianji->GetMesh()->GetAnimInstance())) return;
+	Tianji->GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(GetHitEndDelegate, GetHitMontage);
+}
+
+double UCombat::ObtainAngleForAnim(AActor* Hitter)
+{
+	//获取自身单位向量
+	if (!IsValid(Tianji))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("UCombat::ObtainAngleForAnim: Tianji is not valid."));
+		return 0.0;
+	}
+	const FVector Forward = Tianji->GetActorForwardVector();
+	//使向量处于同一平面
+	const FVector HitterLocation = Hitter->GetActorLocation();
+	const FVector PointLowerd = FVector(HitterLocation.X, HitterLocation.Y, Tianji->GetActorLocation().Z);
+	//获得自身到Hitter的单位向量
+	const FVector ToHit = (PointLowerd - Tianji->GetActorLocation()).GetSafeNormal();
+
+	//单位向量点积获得cos
+	double CosTheta = FVector::DotProduct(Forward, ToHit);
+	//cos转弧度
+	CosTheta = FMath::Clamp(CosTheta, -1.0, 1.0);
+	double Theta = FMath::Acos(CosTheta);
+	//弧度转角度
+	Theta = FMath::RadiansToDegrees(Theta);
+
+	//右手坐标系调整方向
+	const FVector CrossProduct = FVector::CrossProduct(HitterLocation, ToHit);
+	if (CrossProduct.Z < 0)
+	{
+		Theta *= -1.f;
+	}
+
+	return Theta;
+}
+
+void UCombat::OnGetHitMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	if (bInterrupted == true)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("UCombat::OnGetHitMontageEnded: Montage was interrupted."));
+		return;
+	}
+	ChangeCombatState(EPlayerCombatState::EPCS_Unoccupied);
+}
+
+/* 有限状态机 */
+void UCombat::ChangeCombatState(EPlayerCombatState NewState)
+{
+	if (PlayerCombatState == NewState) return;
+
+	if (!CanChangeState(NewState)) return;
+	ExitState();
+	PlayerCombatState = NewState;
+	EnterState(NewState);
+
+}
+
+bool UCombat::CanChangeState(EPlayerCombatState NewState)
+{
+	if (PlayerLifeState == EPlayerLifeState::EPLS_Dead)
+	{
+		return false;
+	}
+
+	if (NewState == EPlayerCombatState::EPCS_HitReact)
+	{
+		return true;
+	}
+	
+
+	switch (PlayerCombatState)
+	{
+		case EPlayerCombatState::EPCS_Unoccupied:
+			return true;
+
+		case EPlayerCombatState::EPCS_HitReact:
+			if (NewState == EPlayerCombatState::EPCS_Unoccupied)
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+
+		case EPlayerCombatState::EPCS_Attacking:
+			return true;
+
+		case EPlayerCombatState::EPCS_Dodging:
+			return false;
+		default:
+			return false;
+	}
+}
+
+void UCombat::ExitState()
+{
+	EPlayerCombatState OldState = PlayerCombatState;
+	switch (OldState)
+	{
+	case(EPlayerCombatState::EPCS_Unoccupied):
+	{
+		return;
+	}
+	case(EPlayerCombatState::EPCS_Attacking):
+	{
+		return;
+	}
+	case(EPlayerCombatState::EPCS_HitReact):
+	{
+		return;
+	}
+	case(EPlayerCombatState::EPCS_Dodging):
+	{
+		return;
+	}
+	default:
+		return;
+	}
+}
+
+void UCombat::EnterState(EPlayerCombatState NewState)
+{
+	switch (NewState)
+	{
+	case(EPlayerCombatState::EPCS_Unoccupied):
+	{
+		return;
+	}
+	case(EPlayerCombatState::EPCS_Attacking):
+	{
+		PlayAttackMontage();
+		return;
+	}
+	case(EPlayerCombatState::EPCS_HitReact):
+	{
+		return;
+	}
+	case(EPlayerCombatState::EPCS_Dodging):
+	{
+		return;
+	}
+	default:
+		return;
+	}
+}
+//通用
+void UCombat::PlayMontageSection(UAnimMontage* Montage, const FName& SectionName)
+{
+	if (!IsValid(Tianji) && !IsValid(Tianji->GetMesh())) return;
+	UAnimInstance* AnimInstance = Tianji->GetMesh()->GetAnimInstance();
+
+	if (!IsValid(AnimInstance) || !IsValid(Montage)) return;
+	AnimInstance->Montage_Play(Montage);
+	AnimInstance->Montage_JumpToSection(SectionName, Montage);
+
 }

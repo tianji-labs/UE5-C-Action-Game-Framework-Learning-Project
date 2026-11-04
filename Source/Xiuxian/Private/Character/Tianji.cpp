@@ -43,11 +43,6 @@ ATianji::ATianji()
 
 }
 
-void ATianji::SetActionState(EActionState NewState)
-{
-	ActionState = NewState;
-}
-
 void ATianji::BeginPlay()
 {
 	Super::BeginPlay();
@@ -75,7 +70,7 @@ void ATianji::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	EnhancedInput->BindAction(IA_Look, ETriggerEvent::Triggered, this, &ATianji::Look);
 	EnhancedInput->BindAction(IA_Menu, ETriggerEvent::Started, this, &ATianji::Menu);
 	EnhancedInput->BindAction(IA_Pickup, ETriggerEvent::Started, this, &ATianji::Pickup);
-	EnhancedInput->BindAction(IA_Attack, ETriggerEvent::Started, this, &ATianji::CharacterAttack);
+	EnhancedInput->BindAction(IA_Attack, ETriggerEvent::Started, this, &ATianji::Attack);
 
 
 }
@@ -99,7 +94,7 @@ void ATianji::Move(const FInputActionValue& Value)
 {
 	const FVector2D MovementVector = Value.Get<FVector2D>();
 
-	if (!Controller || ActionState != EActionState::EAS_Unoccupied) return;
+	if (!Controller || Combat->GetPlayerCombatState()!=EPlayerCombatState::EPCS_Unoccupied || Combat->GetPlayerLifeState() != EPlayerLifeState::EPLS_Alive) return;
 
 	const FRotator YawRot(0, Controller->GetControlRotation().Yaw, 0);
 	const FVector ForwardDir = FRotationMatrix(YawRot).GetUnitAxis(EAxis::X);
@@ -129,7 +124,7 @@ void ATianji::Sprint()
 
 void ATianji::Jump()
 {
-	if (ActionState != EActionState::EAS_Unoccupied) return;
+	if (Combat->GetPlayerCombatState() != EPlayerCombatState::EPCS_Unoccupied || Combat->GetPlayerLifeState() != EPlayerLifeState::EPLS_Alive) return;
 	Super::Jump();
 }
 
@@ -152,106 +147,27 @@ void ATianji::PickupWeapon(AWeapon* Weapon)
 	if (Weapon)
 	{
 		Weapon->Equip(GetMesh(), FName("R_HandSocket"), this, this);
-		WeaponState = EWeaponState::EWS_CloseCombatOneHand;
 		OverlappingItem = nullptr;
 		Weapon->SetSphereNocollision();
 		Weapon->SetWeaponCollisionEnable(false);
-		EquipWeapon = Weapon;
+		WeaponState = EWeaponState::EWS_CloseCombatOneHand;
+		EquippedWeapon = Weapon;
 	}
 }
 
 /* 攻击 */
-void ATianji::CharacterAttack()
+void ATianji::Attack()
 {
-	if (ActionState == EActionState::EAS_Attacking || WeaponState == EWeaponState::EWS_Unequipped) return;
-	PlayMontageSection(AttackMontage, AttackMontageSections[0]);
-	ActionState = EActionState::EAS_Attacking;
+	if (!IsValid(Combat)) return;
+	Combat->HandleAttack();
 }
-
+	
 /* 受击 */
 void ATianji::GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter)
 {
-	GetHitAnim(Hitter);
-}
-
-void ATianji::GetHitAnim(AActor* Hitter)
-{
-
-	const double Theta = ObtainAngleForAnim(Hitter);
-
-	FName Section = FName("FromBack");
-
-	if (Theta < 45.f && Theta > -45.f)
-	{
-		Section = FName("FromFront");
-	}
-	else if (Theta < -135.f && Theta > 135.f)
-	{
-		Section = FName("FromBack");
-	}
-	else if (Theta <= -45.f && Theta >= -135.f)
-	{
-		Section = FName("FromLeft");
-	}
-	else if (Theta <= 135.f && Theta >= 45.f)
-	{
-		Section = FName("FromRight");
-	}
-
-	if (!IsValid(GetHitMontage)) return;
-	PlaySectionMontage(Section, GetHitMontage);
-}
-
-double ATianji::ObtainAngleForAnim(AActor* Hitter)
-{
-	//获取自身单位向量
-	const FVector Forward = GetActorForwardVector();
-	//使向量处于同一平面
-	const FVector HitterLocation = Hitter->GetActorLocation();
-	const FVector PointLowerd = FVector(HitterLocation.X, HitterLocation.Y, GetActorLocation().Z);
-	//获得自身到Hitter的单位向量
-	const FVector ToHit = (PointLowerd - GetActorLocation()).GetSafeNormal();
-
-	//单位向量点积获得cos
-	double CosTheta = FVector::DotProduct(Forward, ToHit);
-	//cos转弧度
-	CosTheta = FMath::Clamp(CosTheta, -1.0, 1.0);
-	double Theta = FMath::Acos(CosTheta);
-	//弧度转角度
-	Theta = FMath::RadiansToDegrees(Theta);
-
-	//右手坐标系调整方向
-	const FVector CrossProduct = FVector::CrossProduct(HitterLocation, ToHit);
-	if (CrossProduct.Z < 0)
-	{
-		Theta *= -1.f;
-	}
-
-	return Theta;
-}
-
-//播放某段蒙太奇动画
-void ATianji::PlayMontageSection(UAnimMontage* Montage, const FName& SectionName)
-{
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance && Montage)
-	{
-		AnimInstance->Montage_Play(Montage); 
-		AnimInstance->Montage_JumpToSection(SectionName, Montage);
-	}
-}
-
-AWeapon* ATianji::GetEquippedWeapon() const
-{
-	return EquipWeapon;
+	if (!IsValid(Combat)) return;
+	Combat->HandleGetHit(Hitter);
 }
 
 
-/* 通用 */
-void ATianji::PlaySectionMontage(FName Section, UAnimMontage* Montage)
-{
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (!IsValid(AnimInstance) || !IsValid(Montage)) return;
-	AnimInstance->Montage_Play(Montage);
-	AnimInstance->Montage_JumpToSection(Section, Montage);
-}
+

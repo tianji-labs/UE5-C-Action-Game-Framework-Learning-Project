@@ -4,8 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Character/StateType.h"
 #include "Combat.generated.h"
 
+class ATianji;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class XIUXIAN_API UCombat : public UActorComponent
@@ -24,9 +26,53 @@ protected:
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Combat")
 	TObjectPtr<AActor> Owner;
+	UPROPERTY(VisibleAnywhere, Category = "Comabt")
+	TObjectPtr<ATianji> Tianji;
+
+/* 攻击 */
+	UPROPERTY(EditDefaultsOnly, Category = "Montage")
+	TObjectPtr<UAnimMontage> AttackMontage;
+	UPROPERTY(EditDefaultsOnly, Category = "Montage")
+	TArray<FName> AttackMontageSections;
+
+	FOnMontageEnded AttackEndDelegate;
+
+	void PlayAttackMontage();
+	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
 	UFUNCTION()
-	void AttackEnd(FName NotifyName, const FBranchingPointNotifyPayload& BranchingPointPayload);
-	UFUNCTION()
 	void SetWeaponCollision(FName NotifyName, const FBranchingPointNotifyPayload& BranchingPointPayload);
+
+/* 受击 */
+	UPROPERTY(EditDefaultsOnly, Category = "Montage")
+	TObjectPtr<UAnimMontage> GetHitMontage;
+
+	FOnMontageEnded GetHitEndDelegate;
+
+	void PlayGetHitMontage(AActor* Hitter);
+	void OnGetHitMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+	double ObtainAngleForAnim(AActor* Hitter);
+/* 状态 */
+	UPROPERTY(VisibleAnywhere, Category = "State")
+	EPlayerCombatState PlayerCombatState = EPlayerCombatState::EPCS_Unoccupied;
+	EPlayerLifeState PlayerLifeState = EPlayerLifeState::EPLS_Alive;
+
+/* 有限状态机 */
+	void ChangeCombatState(EPlayerCombatState NewState);
+	bool CanChangeState(EPlayerCombatState NewState);
+	void ExitState();
+	void EnterState(EPlayerCombatState NewState);
+
+
+/* 通用 */
+	void PlayMontageSection(UAnimMontage* Montage, const FName& SectionName);
+
+public:
+/* 攻击 */
+	void HandleAttack();
+/* 受击 */
+	void HandleGetHit(AActor* Hitter);
+/* 获取 */
+	EPlayerCombatState GetPlayerCombatState() const { return PlayerCombatState; }
+	EPlayerLifeState GetPlayerLifeState() const { return PlayerLifeState; } 
 };

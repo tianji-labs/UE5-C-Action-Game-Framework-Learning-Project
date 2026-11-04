@@ -36,22 +36,7 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	//公开委托，外部可以绑定监听
-	UPROPERTY(BlueprintAssignable, Category = "PersonalAsset|Menu")
-	FOnOpenMenuRequest OnOpenMenuRequest;
-	UPROPERTY(VisibleAnywhere)
-	AWeapon* OverlappingItem;
-
-
-	//UE的FORCEINLINE强制内联
-	FORCEINLINE void SetOverlappingItem(AWeapon* Item) { OverlappingItem = Item; }
-/*状态*/
-	UFUNCTION(BlueprintCallable)
-	void SetActionState(EActionState NewState);
-	FORCEINLINE const EActionState& GetActionState() const { return ActionState; }
-	FORCEINLINE const EWeaponState& GetWeaponState() const { return WeaponState; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -92,8 +77,7 @@ private:
 /* 拾取 */
 	UPROPERTY(EditDefaultsOnly, Category = "Person|Input")
 	TObjectPtr<UInputAction> IA_Pickup;
-	UPROPERTY(VisibleAnywhere, Category = "Person|Weapon")
-	TObjectPtr<AWeapon> EquipWeapon;
+
 
 	void Pickup();
 	void PickupWeapon(AWeapon* Weapon);
@@ -102,33 +86,38 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Person|Input")
 	TObjectPtr<UInputAction> IA_Attack;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Person|Montage")
-	TObjectPtr<UAnimMontage> AttackMontage;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Person|Montage")
-	TArray<FName> AttackMontageSections;
-
-	void CharacterAttack();
+	void Attack();
 
 /* 受击 */
-	UPROPERTY(EditDefaultsOnly, Category = "Montage")
-	TObjectPtr<UAnimMontage> GetHitMontage;
+
 
 	void GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter);
-	void GetHitAnim(AActor* Hitter);
-	double ObtainAngleForAnim(AActor* Hitter);
+
 /* 状态 */
 	UPROPERTY(EditDefaultsOnly, Category = "Person|Combat")
 	TObjectPtr<UCombat> Combat;
 
+	AWeapon* EquippedWeapon = nullptr;
 	EWeaponState WeaponState = EWeaponState::EWS_Unequipped;
-	EActionState ActionState = EActionState::EAS_Unoccupied;
 
 
-/* 动画 */
-	void PlayMontageSection(UAnimMontage* Montage, const FName& SectionName);
-	void PlaySectionMontage(FName Section, UAnimMontage* Montage);
 public:
-	//获取
-	AWeapon* GetEquippedWeapon() const;
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	//公开委托，外部可以绑定监听
+	UPROPERTY(BlueprintAssignable, Category = "PersonalAsset|Menu")
+	FOnOpenMenuRequest OnOpenMenuRequest;
+	UPROPERTY(VisibleAnywhere)
+	AWeapon* OverlappingItem;
+
+
+	//UE的FORCEINLINE强制内联
+	FORCEINLINE void SetOverlappingItem(AWeapon* Item) { OverlappingItem = Item; }
+
+	FORCEINLINE EWeaponState GetWeaponState() const { return WeaponState; }
+
+	FORCEINLINE AWeapon* GetEquippedWeapon() const { return EquippedWeapon; }
+
+	void PlayMontageSection(UAnimMontage* Montage, const FName& SectionName);
+
 };

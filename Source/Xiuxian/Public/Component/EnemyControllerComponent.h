@@ -68,9 +68,8 @@ public:
 
 	void InitializeAI(AEnemyAIController* InEnemyAIController);
 
-	void UpdateBehaviorState();
-
 /* ÓÐÏÞ×´Ì¬»ú */
+	void UpdateBehaviorState();
 	void ChangeEnemyState(EEnemyState NewState);
 
 
