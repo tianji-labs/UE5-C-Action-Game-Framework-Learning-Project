@@ -100,6 +100,10 @@ private:
 	AWeapon* EquippedWeapon = nullptr;
 	EWeaponState WeaponState = EWeaponState::EWS_Unequipped;
 
+/*  Ù–‘ */
+	float MaxHealth = 100.f;
+	float CurrentHealth = 100.f;
+
 
 public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;

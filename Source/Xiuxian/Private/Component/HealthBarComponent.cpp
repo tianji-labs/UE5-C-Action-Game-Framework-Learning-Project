@@ -92,7 +92,7 @@ void UHealthBarComponent::ReceiveDamage(float Damage)
 		AttributeComponent->SetCurrentHealth(NewHealth);
 	}
 }
-
+/* Ω” ’TakeDamgeπ„≤•*/
 void UHealthBarComponent::TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
 	ReceiveDamage(Damage);

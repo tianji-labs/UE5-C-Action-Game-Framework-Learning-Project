@@ -59,7 +59,7 @@ private:
 	//¹¥»÷½áÊøÎ¯ÍÐ
 	FOnMontageEnded AttackEndDelegate;
 	UPROPERTY(EditAnywhere, Category = "Attack")
-	double AttackRadius = 200.f;
+	double AttackRadius = 170.f;
 	UPROPERTY(VisibleAnywhere, Category = "Observer")
 	bool bIsAttackInProgress;
 
@@ -106,6 +106,8 @@ private:
 /* ×´Ì¬ */
 	EDeathPose DeathPose = EDeathPose::EDP_DeathBack;
 
+	UPROPERTY(VisibleAnywhere, Category = "Observer")
+	EEnemyState EnemyState = EEnemyState::EES_NoState;
 
 public:
 /* ¹¥»÷ */ 
@@ -117,4 +119,6 @@ public:
 	FORCEINLINE bool IsAttackInProgress() const { return bIsAttackInProgress; }
 	FORCEINLINE EDeathPose GetDeathPose() const { return DeathPose; }
 	FORCEINLINE AWeapon* GetDeafaultWeapon() const { return DeafaultWeapon; }
+	FORCEINLINE EEnemyState GetEnemyState() const { return EnemyState; }
+	FORCEINLINE void SetEnemyState(EEnemyState NewState) { EnemyState = NewState; }
 };

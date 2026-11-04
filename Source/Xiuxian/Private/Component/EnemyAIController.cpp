@@ -88,7 +88,7 @@ void AEnemyAIController::OnMoveCompleted(FAIRequestID RequestID, const FPathFoll
 {
 	Super::OnMoveCompleted(RequestID, Result);
 
-	if (IsValid(AttributeComponent) && AttributeComponent->GetEnemyState() == EEnemyState::EES_Patrolling)
+	if (IsValid(Enemy) && Enemy->GetEnemyState() == EEnemyState::EES_Patrolling)
 	{
 		//延迟2秒后再次开始巡逻
 		GetWorldTimerManager().SetTimer(PatrolHandle, this, &AEnemyAIController::StartPatrolling, 2.0f, false);

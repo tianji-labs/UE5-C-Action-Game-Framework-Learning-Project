@@ -23,6 +23,7 @@ void UEnemyControllerComponent::BeginPlay()
 	Super::BeginPlay();
 
 	Owner = GetOwner();
+	Enemy = Cast<AEnemy>(Owner);
 
 	if (!IsValid(Owner)) return;
 	EnemyPerception = Owner->GetComponentByClass<UEnemyPerception>();
@@ -117,23 +118,28 @@ void UEnemyControllerComponent::UpdateBehaviorState()
 
 void UEnemyControllerComponent::ChangeEnemyState(EEnemyState NewState)
 {
-	EEnemyState EnemyState = AttributeComponent->GetEnemyState();
+	UE_LOG(LogTemp, Warning, TEXT("First"));
 
-	if (EnemyState == NewState) return;
+	if (!IsValid(Enemy)) return;
+
+	EEnemyState CurEnemyState = Enemy->GetEnemyState();
+
+	UE_LOG(LogTemp, Warning, TEXT("Second"));
+
+	if (CurEnemyState == NewState) return;
+
+	UE_LOG(LogTemp, Warning, TEXT("Will CanChangeState"));
 
 	if (!CanChangeState(NewState)) return;
 	
-	if (!IsValid(AttributeComponent)) return;
-
-	ExitState(AttributeComponent->GetEnemyState());
-	AttributeComponent->ChangeBehaviorState(NewState);
+	ExitState(CurEnemyState);
+	Enemy->SetEnemyState(NewState);
 	EnterState(NewState);
 }
 //ÅÐ¶ÏÊÇ·ñÔÊÐí¸Ä±ä×´Ì¬
 bool UEnemyControllerComponent::CanChangeState(EEnemyState NewState)
 {
-	EEnemyState EnemyState = AttributeComponent->GetEnemyState();
-	AEnemy* Enemy = Cast<AEnemy>(Owner);
+	EEnemyState EnemyState = Enemy->GetEnemyState();
 	if (EnemyState == EEnemyState::EES_Dead)
 	{
 		return false;
@@ -150,7 +156,8 @@ bool UEnemyControllerComponent::CanChangeState(EEnemyState NewState)
 	switch (EnemyState)
 	{
 	case EEnemyState::EES_NoState:
-	
+		
+		UE_LOG(LogTemp, Warning, TEXT("UEnemyControllerComponent::CanChangeState"));
 		return true;
 	
 	case EEnemyState::EES_Patrolling:
@@ -177,7 +184,7 @@ bool UEnemyControllerComponent::CanChangeState(EEnemyState NewState)
 //Çå³ý¾É×´Ì¬
 void UEnemyControllerComponent::ExitState(EEnemyState OldState)
 {
-	OldState = AttributeComponent->GetEnemyState();
+	OldState = Enemy->GetEnemyState();
 	switch (OldState)
 	{
 	case EEnemyState::EES_NoState:
@@ -198,9 +205,7 @@ void UEnemyControllerComponent::ExitState(EEnemyState OldState)
 	}
 	case EEnemyState::EES_Attacking:
 	{
-		if (!IsValid(Owner)) return;
-		AEnemy* Enemy = Cast<AEnemy>(Owner);
-		if (!IsValid(Enemy)) return;	
+		if (!IsValid(Enemy)) return;
 		Enemy->StopAttack();
 		return;
 	}
@@ -215,8 +220,6 @@ void UEnemyControllerComponent::EnterState(EEnemyState NewState)
 	{
 	case EEnemyState::EES_Dead:
 	{
-		if (!IsValid(Owner)) return;
-		AEnemy* Enemy = Cast<AEnemy>(Owner);
 		if (!IsValid(Enemy)) return;
 		Enemy->Die();
 		return;
@@ -239,8 +242,6 @@ void UEnemyControllerComponent::EnterState(EEnemyState NewState)
 	}
 	case EEnemyState::EES_Attacking:
 	{
-		if (!IsValid(Owner)) return;
-		AEnemy* Enemy = Cast<AEnemy>(Owner);
 
 		if (!IsValid(Enemy)) return;
 		Enemy->Attack(AttackTarget);

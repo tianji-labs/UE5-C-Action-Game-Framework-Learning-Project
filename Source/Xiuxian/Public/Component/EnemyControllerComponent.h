@@ -29,6 +29,8 @@ protected:
 private:
 	UPROPERTY()
 	TObjectPtr<AActor> Owner;
+	UPROPERTY()
+	TObjectPtr<AEnemy> Enemy;
 /* Ñ²Âß */
 	UPROPERTY(EditAnywhere, Category = "Patrolling")
 	TArray<TObjectPtr<AActor>> PatrolPoints;

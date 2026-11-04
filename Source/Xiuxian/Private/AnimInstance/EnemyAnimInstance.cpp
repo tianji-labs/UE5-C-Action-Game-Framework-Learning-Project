@@ -26,7 +26,7 @@ void UEnemyAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	{
 		Velocity = MyCharacterMovement->Velocity;
 		GroundSpeed = UKismetMathLibrary::VSizeXY(Velocity);
-		EnemyState = AttributeComponent->GetEnemyState();
+		EnemyState = Enemy->GetEnemyState();
 		DeathPose = Enemy->GetDeathPose();
 	}
 }
