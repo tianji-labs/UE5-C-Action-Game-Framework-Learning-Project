@@ -24,6 +24,8 @@ class UCameraComponent;
 class AWeapon;
 //combat组件
 class UCombat;
+//属性
+class UAttributeComponent;
 
 
 UCLASS()
@@ -48,11 +50,11 @@ private:
 /*第三人称视角*/
 	void Look(const FInputActionValue& Value);
 
-	UPROPERTY(VisibleAnywhere, Category = "Person|Camera")
+	UPROPERTY(VisibleAnywhere, Category = "Camera")
 	TObjectPtr<USpringArmComponent> SpringArm;
-	UPROPERTY(VisibleAnywhere, Category = "Person|Camera")
+	UPROPERTY(VisibleAnywhere, Category = "Camera")
 	TObjectPtr<UCameraComponent> Camera;
-	UPROPERTY(EditDefaultsOnly,Category = "Person|Camera")
+	UPROPERTY(EditDefaultsOnly,Category = "Camera")
 	TObjectPtr<UInputAction> IA_Look;
 
 /* 移动 */
@@ -61,21 +63,21 @@ private:
 	void Sprint();
 	void Jump();
 
-	UPROPERTY(EditDefaultsOnly,Category = "Person|Input")
+	UPROPERTY(EditDefaultsOnly,Category = "Input")
 	TObjectPtr<UInputAction> IA_Move;
-	UPROPERTY(EditDefaultsOnly,Category = "Person|Input")
+	UPROPERTY(EditDefaultsOnly,Category = "Input")
 	TObjectPtr<UInputAction> IA_Sprint;
-	UPROPERTY(EditDefaultsOnly,Category = "Person|Input")
+	UPROPERTY(EditDefaultsOnly,Category = "Input")
 	TObjectPtr<UInputAction> IA_Jump;
 
 /* 菜单 */
 	void Menu();
 
-	UPROPERTY(EditDefaultsOnly,Category = "Person|Input")
+	UPROPERTY(EditDefaultsOnly,Category = "Input")
 	TObjectPtr<UInputAction> IA_Menu;
 
 /* 拾取 */
-	UPROPERTY(EditDefaultsOnly, Category = "Person|Input")
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	TObjectPtr<UInputAction> IA_Pickup;
 
 
@@ -83,33 +85,31 @@ private:
 	void PickupWeapon(AWeapon* Weapon);
 
 /* 攻击 */
-	UPROPERTY(EditDefaultsOnly, Category = "Person|Input")
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	TObjectPtr<UInputAction> IA_Attack;
 
 	void Attack();
 
 /* 受击 */
-
-
 	void GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter);
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 /* 状态 */
-	UPROPERTY(EditDefaultsOnly, Category = "Person|Combat")
+	UPROPERTY(EditDefaultsOnly, Category = "Combat")
 	TObjectPtr<UCombat> Combat;
 
 	AWeapon* EquippedWeapon = nullptr;
 	EWeaponState WeaponState = EWeaponState::EWS_Unequipped;
-
 /* 属性 */
-	float MaxHealth = 100.f;
-	float CurrentHealth = 100.f;
+	UPROPERTY(EditDefaultsOnly, Category = "Attribute")
+	TObjectPtr<UAttributeComponent> AttributeComponent; 
 
 
 public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	//公开委托，外部可以绑定监听
-	UPROPERTY(BlueprintAssignable, Category = "PersonalAsset|Menu")
+	UPROPERTY(BlueprintAssignable, Category = "Menu")
 	FOnOpenMenuRequest OnOpenMenuRequest;
 	UPROPERTY(VisibleAnywhere)
 	AWeapon* OverlappingItem;

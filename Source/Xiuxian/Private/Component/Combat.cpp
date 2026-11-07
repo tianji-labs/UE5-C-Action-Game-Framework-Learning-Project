@@ -100,6 +100,7 @@ void UCombat::SetWeaponCollision(FName NotifyName, const FBranchingPointNotifyPa
 void UCombat::HandleGetHit(AActor* Hitter)
 {
 	PlayGetHitMontage(Hitter);
+
 	ChangeCombatState(EPlayerCombatState::EPCS_HitReact);
 }
 

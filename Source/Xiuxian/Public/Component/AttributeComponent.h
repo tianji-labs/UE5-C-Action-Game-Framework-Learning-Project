@@ -32,22 +32,20 @@ private:
 	float MaxSpeed = 600.f;
 
 public:	
-/* 获取 */
 	//血条
 	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
-	FORCEINLINE float GetCurrentHealth() const { return CurrentHealth; }
-	//AI
-	FORCEINLINE float GetMaxSpeed() const { return MaxSpeed; }
-	//状态
-
-/* 设置 */
-	//血条
 	FORCEINLINE void SetMaxHealth(float NewMaxHealth) { MaxHealth = NewMaxHealth; }
+
+	FORCEINLINE float GetCurrentHealth() const { return CurrentHealth; }
 	FORCEINLINE void SetCurrentHealth(float NewCurrentHealth) { CurrentHealth = NewCurrentHealth; }
 	//AI
+	FORCEINLINE float GetMaxSpeed() const { return MaxSpeed; }
 	FORCEINLINE void SetMaxSpeed(float NewMaxSpeed) { MaxSpeed = NewMaxSpeed; }
+
 /* 判定 */
 	FORCEINLINE bool IsDead() const { return CurrentHealth <= 0.f; }
+
+	float GetHealthBarPercent() const;
 
 
 };

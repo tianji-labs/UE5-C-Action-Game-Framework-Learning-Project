@@ -16,6 +16,11 @@ void UAttributeComponent::BeginPlay()
 	CurrentHealth = MaxHealth;
 }
 
+float UAttributeComponent::GetHealthBarPercent() const
+{
+		return CurrentHealth / MaxHealth;
+}
+
 
 
 

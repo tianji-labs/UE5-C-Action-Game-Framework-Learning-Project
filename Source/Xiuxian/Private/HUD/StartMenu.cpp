@@ -17,7 +17,7 @@ void AStartMenu::BeginPlay()
 		PC->OnOpenMenuRequest.AddDynamic(this, &AStartMenu::OpenMenu);
 	}
 	//开始显示菜单
-	OpenMenu();
+	//OpenMenu();
 }
 
 //解绑

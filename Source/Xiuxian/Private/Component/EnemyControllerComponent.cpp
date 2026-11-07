@@ -22,9 +22,6 @@ void UEnemyControllerComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	Owner = GetOwner();
-	Enemy = Cast<AEnemy>(Owner);
-
 	if (!IsValid(Owner)) return;
 	EnemyPerception = Owner->GetComponentByClass<UEnemyPerception>();
 	AttributeComponent = Owner->GetComponentByClass<UAttributeComponent>();
@@ -84,6 +81,9 @@ void UEnemyControllerComponent::OnAttackRangeEndOverlap(UPrimitiveComponent* Ove
 
 void UEnemyControllerComponent::InitializeAI(AEnemyAIController* InEnemyAIController)
 {
+	Owner = GetOwner();
+	Enemy = Cast<AEnemy>(Owner);
+
 	EnemyAIController = InEnemyAIController;
 	//确保AttributeComponent有效并且更新行为状态
 	if (!IsValid(AttributeComponent))
@@ -118,17 +118,15 @@ void UEnemyControllerComponent::UpdateBehaviorState()
 
 void UEnemyControllerComponent::ChangeEnemyState(EEnemyState NewState)
 {
-	UE_LOG(LogTemp, Warning, TEXT("First"));
-
-	if (!IsValid(Enemy)) return;
+	if (!IsValid(Enemy))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Enemy is not valid"));
+		return;
+	}
 
 	EEnemyState CurEnemyState = Enemy->GetEnemyState();
 
-	UE_LOG(LogTemp, Warning, TEXT("Second"));
-
 	if (CurEnemyState == NewState) return;
-
-	UE_LOG(LogTemp, Warning, TEXT("Will CanChangeState"));
 
 	if (!CanChangeState(NewState)) return;
 	

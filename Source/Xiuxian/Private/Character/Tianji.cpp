@@ -17,6 +17,7 @@
 #include "HUD/StartMenu.h"
 #include "Item/Weapon.h"
 #include "Component/Combat.h"
+#include "Component/AttributeComponent.h"
 
 
 ATianji::ATianji()
@@ -40,6 +41,8 @@ ATianji::ATianji()
 
 	//combat组件
 	Combat = CreateDefaultSubobject<UCombat>(TEXT("Combat"));
+	//属性组件
+	AttributeComponent = CreateDefaultSubobject<UAttributeComponent>(TEXT("AttributeComponent"));
 
 }
 
@@ -167,6 +170,14 @@ void ATianji::GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter)
 {
 	if (!IsValid(Combat)) return;
 	Combat->HandleGetHit(Hitter);
+}
+/* 受伤 */
+float ATianji::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	AttributeComponent->SetCurrentHealth(FMath::Clamp(AttributeComponent->GetCurrentHealth() - DamageAmount, 0.f, AttributeComponent->GetMaxHealth()));
+	return 0.0f;
 }
 
 

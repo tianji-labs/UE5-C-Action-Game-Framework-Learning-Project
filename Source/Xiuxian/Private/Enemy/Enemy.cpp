@@ -200,7 +200,7 @@ void AEnemy::GetHitAnim(AActor* Hitter)
 float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	if (!IsValid(AttributeComponent)|| EnemyState==EEnemyState::EES_Dead) return 0.f;
-	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser); //自动广播
+	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser); //自动广播给TakeAnyDamage
 	return 0.0f;
 }
 

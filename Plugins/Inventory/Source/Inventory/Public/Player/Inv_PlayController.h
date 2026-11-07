@@ -10,6 +10,7 @@
 class UInputMappingContext;
 class UInputAction;
 class UInv_HUDWidget;
+class UPlayerHeathBarWidget;
 
 
 UCLASS()

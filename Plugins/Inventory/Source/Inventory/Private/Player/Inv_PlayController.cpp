@@ -7,6 +7,7 @@
 #include "EnhancedInputSubsystems.h"
 //HUD
 #include "HUD/Widget/Inv_HUDWidget.h"
+
 //пео╒
 #include"Kismet/GameplayStatics.h"
 #include <Item/Component/Inv_ItemComponent.h>
@@ -43,6 +44,7 @@ void AInv_PlayController::BeginPlay()
 	}
 
 	CreateHUDWidget();
+
 }
 
 void AInv_PlayController::SetupInputComponent()
@@ -117,6 +119,7 @@ void AInv_PlayController::CreateHUDWidget()
 {
 	if (!IsLocalController()) return;
 	HUDWidget = CreateWidget<UInv_HUDWidget>(this,HUDWidgetClass);
+
 	if (IsValid(HUDWidget))
 	{
 		HUDWidget->AddToViewport();
