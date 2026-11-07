@@ -31,7 +31,6 @@ void AMainPlayerController::BeginPlay()
 	PlayerHealthBarWidget = CreateWidget<UPlayerHeathBarWidget>(this, PlayerHealthBarWidgetClass);
 
 	if (!IsValid(PlayerHealthBarWidget)) return;
-	UE_LOG(LogTemp, Warning, TEXT("Healthbar created successfully"));
 	PlayerHealthBarWidget->AddToViewport();
 }
 

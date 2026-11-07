@@ -20,7 +20,6 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	//状态
 
 	//血条
 	UPROPERTY(EditAnywhere, Category = "Attribute")
@@ -31,6 +30,11 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Attribute")
 	float MaxSpeed = 600.f;
 
+/* 受伤 */
+
+
+	UFUNCTION()
+	void HandleTakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser);
 
 
 public:	
@@ -48,8 +52,8 @@ public:
 	FORCEINLINE bool IsDead() const { return CurrentHealth <= 0.f; }
 
 	float GetHealthBarPercent() const;
+/* 生命值变化 */
+	FOnHealthChanged OnHealthChanged;
 
-/* 受伤 */
-	void TakeDamage(float DamageAmount);
 
 };

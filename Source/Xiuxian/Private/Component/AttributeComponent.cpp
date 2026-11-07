@@ -16,19 +16,25 @@ void UAttributeComponent::BeginPlay()
 	Super::BeginPlay();
 	
 	CurrentHealth = MaxHealth;
+
+	GetOwner()->OnTakeAnyDamage.AddDynamic(this, &UAttributeComponent::HandleTakeAnyDamage);
 }
+
+void UAttributeComponent::HandleTakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
+{
+	CurrentHealth = FMath::Clamp(CurrentHealth- Damage, 0.f, MaxHealth);
+
+	float HealthPercent = GetHealthBarPercent();
+
+	OnHealthChanged.Broadcast(HealthPercent);
+
+}
+
 
 float UAttributeComponent::GetHealthBarPercent() const
 {
 		return CurrentHealth / MaxHealth;
 }
-
-void UAttributeComponent::TakeDamage(float DamageAmount)
-{
-	CurrentHealth = FMath::Clamp(CurrentHealth- DamageAmount, 0.f, MaxHealth);
-}
-
-
 
 
 

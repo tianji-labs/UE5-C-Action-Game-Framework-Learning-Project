@@ -50,7 +50,6 @@ void ATianji::BeginPlay()
 {
 	Super::BeginPlay();
 
-	
 }
 
 void ATianji::Tick(float DeltaTime)
@@ -170,15 +169,6 @@ void ATianji::GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter)
 {
 	if (!IsValid(Combat)) return;
 	Combat->HandleGetHit(Hitter);
-}
-
-/* ÊÜÉË */
-float ATianji::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
-	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-
-	AttributeComponent->SetCurrentHealth(FMath::Clamp(AttributeComponent->GetCurrentHealth() - DamageAmount, 0.f, AttributeComponent->GetMaxHealth()));
-	return 0.0f;
 }
 
 

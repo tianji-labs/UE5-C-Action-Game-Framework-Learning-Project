@@ -4,7 +4,20 @@
 #include "HUD/PlayerHeathBarWidget.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
+#include "Component/AttributeComponent.h"
 
+
+void UPlayerHeathBarWidget::NativeOnInitialized()
+{
+	Super::NativeOnInitialized();
+	APawn* PlayerPawn = GetOwningPlayerPawn();
+	if (!IsValid(PlayerPawn)) return;
+	UAttributeComponent* AttributeComponent = PlayerPawn->FindComponentByClass<UAttributeComponent>();
+	if (!IsValid(AttributeComponent)) return;
+	AttributeComponent->OnHealthChanged.AddDynamic(this, &UPlayerHeathBarWidget::SetHealthPercent);
+
+	SetHealthPercent(AttributeComponent->GetHealthBarPercent());
+}
 
 void UPlayerHeathBarWidget::SetHealthPercent(float Percent)
 {

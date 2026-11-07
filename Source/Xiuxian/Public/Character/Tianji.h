@@ -92,7 +92,6 @@ private:
 
 /* Κά»χ */
 	void GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter);
-	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 /* Χ΄Μ¬ */
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")

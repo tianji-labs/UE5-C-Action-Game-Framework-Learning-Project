@@ -13,6 +13,10 @@ UCLASS()
 class XIUXIAN_API UPlayerHeathBarWidget : public UUserWidget
 {
 	GENERATED_BODY()
+
+protected:
+	virtual void NativeOnInitialized() override;
+
 private:
 	UPROPERTY(meta = (Bindwidget))
 	TObjectPtr<UProgressBar> HealthBar;
