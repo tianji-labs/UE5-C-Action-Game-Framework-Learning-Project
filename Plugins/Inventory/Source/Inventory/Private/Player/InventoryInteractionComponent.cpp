@@ -19,7 +19,7 @@ UInventoryInteractionComponent::UInventoryInteractionComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 
-	TraceLength = 1000.0;
+	TraceLength = 400.0;
 
 	ItemTraceChannel = ECC_GameTraceChannel1;
 }

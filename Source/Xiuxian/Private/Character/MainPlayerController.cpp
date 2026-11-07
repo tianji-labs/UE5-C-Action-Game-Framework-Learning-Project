@@ -2,6 +2,7 @@
 
 
 #include "Character/MainPlayerController.h"
+//血条
 #include "HUD/PlayerHeathBarWidget.h"
 //增强输入
 #include "EnhancedInputComponent.h"
@@ -30,6 +31,7 @@ void AMainPlayerController::BeginPlay()
 	PlayerHealthBarWidget = CreateWidget<UPlayerHeathBarWidget>(this, PlayerHealthBarWidgetClass);
 
 	if (!IsValid(PlayerHealthBarWidget)) return;
+	UE_LOG(LogTemp, Warning, TEXT("Healthbar created successfully"));
 	PlayerHealthBarWidget->AddToViewport();
 }
 

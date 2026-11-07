@@ -1,6 +1,8 @@
 
 #include "Component/AttributeComponent.h"
 
+#include "Kismet/KismetMathLibrary.h"
+
 
 UAttributeComponent::UAttributeComponent()
 {
@@ -19,6 +21,11 @@ void UAttributeComponent::BeginPlay()
 float UAttributeComponent::GetHealthBarPercent() const
 {
 		return CurrentHealth / MaxHealth;
+}
+
+void UAttributeComponent::TakeDamage(float DamageAmount)
+{
+	CurrentHealth = FMath::Clamp(CurrentHealth- DamageAmount, 0.f, MaxHealth);
 }
 
 

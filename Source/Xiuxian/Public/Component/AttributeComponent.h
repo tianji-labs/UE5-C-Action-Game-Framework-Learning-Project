@@ -6,7 +6,7 @@
 #include"Character/StateType.h"
 #include "AttributeComponent.generated.h"
 
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthChanged, float, NewHealthPercent);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class XIUXIAN_API UAttributeComponent : public UActorComponent
@@ -31,6 +31,8 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Attribute")
 	float MaxSpeed = 600.f;
 
+
+
 public:	
 	//—™Ãı
 	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
@@ -47,5 +49,7 @@ public:
 
 	float GetHealthBarPercent() const;
 
+/*  ‹…À */
+	void TakeDamage(float DamageAmount);
 
 };

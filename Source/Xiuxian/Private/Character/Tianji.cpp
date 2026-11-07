@@ -171,6 +171,7 @@ void ATianji::GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter)
 	if (!IsValid(Combat)) return;
 	Combat->HandleGetHit(Hitter);
 }
+
 /*  ‹…À */
 float ATianji::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
