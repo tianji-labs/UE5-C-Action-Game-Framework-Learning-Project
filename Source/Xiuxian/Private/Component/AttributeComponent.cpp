@@ -17,6 +17,7 @@ void UAttributeComponent::BeginPlay()
 	
 	CurrentHealth = MaxHealth;
 
+	if (!IsValid(GetOwner())) return;
 	GetOwner()->OnTakeAnyDamage.AddDynamic(this, &UAttributeComponent::HandleTakeAnyDamage);
 }
 

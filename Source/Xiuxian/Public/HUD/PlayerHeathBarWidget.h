@@ -25,6 +25,7 @@ private:
 	TObjectPtr<UTextBlock> HealthText;
 
 public:
+	UFUNCTION()
 	void SetHealthPercent(float Percent);
 
 };
