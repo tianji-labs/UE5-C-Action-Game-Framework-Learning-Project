@@ -8,6 +8,8 @@
 #include "Combat.generated.h"
 
 class ATianji;
+class UAttributeComponent;
+class UAnimMontage;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class XIUXIAN_API UCombat : public UActorComponent
@@ -42,6 +44,12 @@ private:
 
 	UFUNCTION()
 	void SetWeaponCollision(FName NotifyName, const FBranchingPointNotifyPayload& BranchingPointPayload);
+/* 死亡 */
+	TWeakObjectPtr<UAttributeComponent> AttributeComponent;
+	UPROPERTY(EditAnywhere, Category = "Montage")
+	TObjectPtr<UAnimMontage> DeadMontage;
+
+	void DeadAnim(AActor* Hitter);
 
 /* 受击 */
 	UPROPERTY(EditDefaultsOnly, Category = "Montage")
@@ -56,6 +64,7 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "State")
 	EPlayerCombatState PlayerCombatState = EPlayerCombatState::EPCS_Unoccupied;
 	EPlayerLifeState PlayerLifeState = EPlayerLifeState::EPLS_Alive;
+	EDeathPose DeathPose = EDeathPose::EDP_None;
 
 /* 有限状态机 */
 	void ChangeCombatState(EPlayerCombatState NewState);
@@ -72,7 +81,11 @@ public:
 	void HandleAttack();
 /* 受击 */
 	void HandleGetHit(AActor* Hitter);
+/* 死亡 */
+	void HandleDeath(AActor* Hitter);
 /* 获取 */
 	EPlayerCombatState GetPlayerCombatState() const { return PlayerCombatState; }
 	EPlayerLifeState GetPlayerLifeState() const { return PlayerLifeState; } 
+	UFUNCTION(BlueprintCallable)
+	EDeathPose GetDeathPose() const { return DeathPose; }
 };

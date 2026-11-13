@@ -168,6 +168,13 @@ void ATianji::Attack()
 void ATianji::GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter)
 {
 	if (!IsValid(Combat)) return;
+
+	if (IsValid(AttributeComponent) && AttributeComponent->IsDead())
+	{
+		Combat->HandleDeath(Hitter);
+		return;
+	}
+
 	Combat->HandleGetHit(Hitter);
 }
 

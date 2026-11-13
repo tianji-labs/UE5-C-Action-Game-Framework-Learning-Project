@@ -10,6 +10,7 @@
 
 class ATianji;
 class UCharacterMovementComponent;
+class UCombat;
 
 UCLASS()
 class XIUXIAN_API UTianjiAnimInstance : public UAnimInstance
@@ -39,4 +40,9 @@ protected:
 	float GroundSpeed;
 	UPROPERTY(BlueprintReadOnly, Category = "PersonalAsset|StateType")
 	EWeaponState WeaponState;
+	//ËÀÍö×ËÌ¬
+	UPROPERTY(BlueprintReadOnly, Category = "PersonalAsset|StateType")
+	EDeathPose DeathPose;
+
+	TWeakObjectPtr<UCombat> Combat;
 };

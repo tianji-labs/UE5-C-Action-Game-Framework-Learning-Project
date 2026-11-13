@@ -8,6 +8,8 @@
 #include "Kismet/KismetMathLibrary.h"
 //移动组件
 #include "GameFramework/CharacterMovementComponent.h"
+//combat组件
+#include "Component/Combat.h"
 
 void UTianjiAnimInstance::NativeInitializeAnimation()
 {
@@ -17,7 +19,9 @@ void UTianjiAnimInstance::NativeInitializeAnimation()
 	if (MyCharacter)
 	{
 		MyCharacterMovement = MyCharacter->GetCharacterMovement();
+		Combat = MyCharacter->FindComponentByClass<UCombat>();
 	}
+
 }
 
 void UTianjiAnimInstance::NativeUpdateAnimation(float DeltaTime)
@@ -30,4 +34,6 @@ void UTianjiAnimInstance::NativeUpdateAnimation(float DeltaTime)
 		IsFalling = MyCharacterMovement->IsFalling();
 		WeaponState = MyCharacter->GetWeaponState();
 	}
+	if (!Combat.IsValid()) return;
+	DeathPose = Combat->GetDeathPose();
 }

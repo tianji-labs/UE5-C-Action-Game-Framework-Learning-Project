@@ -155,7 +155,6 @@ bool UEnemyControllerComponent::CanChangeState(EEnemyState NewState)
 	{
 	case EEnemyState::EES_NoState:
 		
-		UE_LOG(LogTemp, Warning, TEXT("UEnemyControllerComponent::CanChangeState"));
 		return true;
 	
 	case EEnemyState::EES_Patrolling:

@@ -6,6 +6,7 @@
 #include "Character/StateType.h"
 #include "Character/Tianji.h"
 #include"Item/Weapon.h"
+#include "Component/AttributeComponent.h"
 
 
 UCombat::UCombat()
@@ -35,6 +36,7 @@ void UCombat::BeginPlay()
 	if (!IsValid(AnimInstance)) return;
 	AnimInstance->OnPlayMontageNotifyBegin.AddUniqueDynamic(this, &UCombat::SetWeaponCollision);
 
+
 }
 
 void UCombat::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -62,9 +64,9 @@ void UCombat::HandleAttack()
 	ChangeCombatState(EPlayerCombatState::EPCS_Attacking);
 }
 
-
 void UCombat::PlayAttackMontage()
 {
+	if (!IsValid(AttackMontage) || AttackMontageSections.Num() == 0) return;
 	PlayMontageSection(AttackMontage, AttackMontageSections[0]);
 
 	AttackEndDelegate.BindUObject(this, &UCombat::OnAttackMontageEnded);
@@ -94,6 +96,35 @@ void UCombat::SetWeaponCollision(FName NotifyName, const FBranchingPointNotifyPa
 	{
 		OwnerCharacter->GetEquippedWeapon()->SetWeaponCollisionEnable(false);
 	}
+}
+
+/* ËÀÍö */ 
+void UCombat::HandleDeath(AActor* Hitter)
+{
+	if (PlayerLifeState == EPlayerLifeState::EPLS_Dead) return;
+	ChangeCombatState(EPlayerCombatState::EPCS_Unoccupied);
+	PlayerLifeState = EPlayerLifeState::EPLS_Dead;
+	DeadAnim(Hitter);
+}
+
+void UCombat::DeadAnim(AActor* Hitter)
+{
+	const double Theta = ObtainAngleForAnim(Hitter);
+
+	FName Section = FName("Back");
+
+	if (Theta <= -90.f || Theta >= 90.f)
+	{
+		Section = FName("Front");
+		DeathPose = EDeathPose::EDP_DeathFront;
+	}
+	else
+	{
+		Section = FName("Back");
+		DeathPose = EDeathPose::EDP_DeathBack;
+	}
+
+//	PlayMontageSection(DeadMontage,Section);
 }
 
 /* ÊÜ»÷ */

@@ -65,13 +65,14 @@ void AWeapon::BoxTrace(FHitResult& HitResult)
 	IgnoreActor.AddUnique(this);
 	IgnoreActor.AddUnique(GetOwner());
 
-	UKismetSystemLibrary::BoxTraceSingle(
+	bool bHit;
+	bHit = UKismetSystemLibrary::BoxTraceSingle(
 		this,
 		Start,
 		End,
 		BoxTraceExtent,
 		BoxTraceStart->GetComponentRotation(),
-		ETraceTypeQuery::TraceTypeQuery1,
+		UEngineTypes::ConvertToTraceType(ECollisionChannel::ECC_EngineTraceChannel2),
 		false,
 		IgnoreActor,
 		bShowBoxDebug ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None,
@@ -111,13 +112,15 @@ void AWeapon::OnBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor
 {
 	FHitResult HitResult;
 
+	UE_LOG(LogTemp, Warning, TEXT("OnBoxBeginOverlap, other actor: %s, Overlapped Component: %s, OtherComponent: %s"), *OtherActor->GetName(), *OverlappedComponent->GetName(), *OtherComp->GetName());
 	//先处理伤害
 	BoxTrace(HitResult);
+
 	if (!IsValid(HitResult.GetActor()) || !IsValid(GetInstigator())) return;
 	UGameplayStatics::ApplyDamage(HitResult.GetActor(), 20.f, GetInstigator()->GetController(), this, UDamageType::StaticClass());
 	//再处理受击
 	ExecuteGetHit(HitResult);
-	
+
 }
 
 void AWeapon::SetBoxNoCollision()

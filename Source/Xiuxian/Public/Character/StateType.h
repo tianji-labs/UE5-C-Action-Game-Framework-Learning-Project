@@ -28,6 +28,7 @@ enum class EPlayerCombatState : uint8
 UENUM(BlueprintType)
 enum class EDeathPose : uint8
 {
+	EDP_None UMETA(DisplayName = "None"),
 	EDP_DeathBack UMETA(DisplayName = "DeathBack"),
 	EDP_DeathFront UMETA(DisplayName = "DeathFront")
 };
