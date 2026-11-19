@@ -16,4 +16,6 @@ class XIUXIAN_API UHealthBarWidget : public UUserWidget
 public:
 	UPROPERTY(meta = (Bindwidget))
 	TObjectPtr<UProgressBar> HealthBar;
+
+
 };

@@ -7,24 +7,20 @@
 #include "Components/SphereComponent.h"
 //组件
 #include"Components/CapsuleComponent.h"
-#include "Component/EnemyControllerComponent.h"
 #include "Component/EnemyPerception.h"
 #include"Perception/AISenseConfig_Sight.h"
-#include"Component/HealthBar.h"
-#include"Component/HealthBarComponent.h"
 #include"Component/AttributeComponent.h"
+#include"Component/EnemyAIController.h"
 //武器
 #include"Item/Weapon.h"
 //动画
 #include"AnimInstance/EnemyAnimInstance.h"
+#include "BehaviorTree/BlackboardComponent.h"
 
 AEnemy::AEnemy()
 {
-	PrimaryActorTick.bCanEverTick = true;
-	HealthBarComp = CreateDefaultSubobject<UHealthBarComponent>(TEXT("HealthBarComp"));
-	//血条
-	HealthBar = CreateDefaultSubobject<UHealthBar>(TEXT("HealBar"));
-	HealthBar->SetupAttachment(GetRootComponent());
+	PrimaryActorTick.bCanEverTick = false;
+
 	//感知
 	EnemyPerception = CreateDefaultSubobject<UEnemyPerception>(TEXT("EnemyPerception"));
 	SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig"));
@@ -40,13 +36,13 @@ AEnemy::AEnemy()
 	GetSenseImplementation 获得配置对应的 Sense 类型  AISense_Sight
 	SetDominantSense 把 Sense 设置为主要/主导感知类型
 	*/
-	EnemyControllerComponent = CreateDefaultSubobject<UEnemyControllerComponent>(TEXT("EnemyControllerComponent"));
 	//属性
 	AttributeComponent = CreateDefaultSubobject<UAttributeComponent>(TEXT("AttributeComp"));
 	//攻击范围
 	AttackRangeSphere = CreateDefaultSubobject<USphereComponent>(TEXT("AttackRangeSphere"));
 	AttackRangeSphere->SetupAttachment(GetRootComponent());
 	AttackRangeSphere->InitSphereRadius(AttackRadius);
+
 	
 }
 
@@ -62,36 +58,21 @@ void AEnemy::BeginPlay()
 	if (!IsValid(AnimInstance)) return;
 	AnimInstance->OnPlayMontageNotifyBegin.AddUniqueDynamic(this, &AEnemy::SetWeaponCollidion);
 
+	if (!IsValid(AttackRangeSphere)) return;
+	AttackRangeSphere->OnComponentBeginOverlap.AddUniqueDynamic(this, &AEnemy::AttackRangeBeginOverlap);
+	AttackRangeSphere->OnComponentEndOverlap.AddUniqueDynamic(this, &AEnemy::AttackRangeEndOverlap);
+
 }
 
-void AEnemy::Tick(float DeltaTime)
+void AEnemy::AttackRangeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	Super::Tick(DeltaTime);
-
+	GetBlackboardComponent()->SetValueAsBool(FName("InAttackRange"), true);
 }
 
-/* 攻击 */
-void AEnemy::Attack(AActor* Target)
+void AEnemy::AttackRangeEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	GetWorldTimerManager().SetTimer(AttackHandle, this, &AEnemy::PlayAttackMontage, 1.f, false);
+	GetBlackboardComponent()->SetValueAsBool(FName("InAttackRange"), false);
 }
-
-void AEnemy::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
-{
-	bIsAttackInProgress = false;
-
-	if (!IsValid(EnemyControllerComponent)) return;
-	EnemyControllerComponent->UpdateBehaviorState();
-
-	if (!IsValid(EnemyControllerComponent->GetAttackTarget()) || AttributeComponent->IsDead()) return;
-	Attack(EnemyControllerComponent->GetAttackTarget());
-}
-
-void AEnemy::StopAttack()
-{
-	GetWorldTimerManager().ClearTimer(AttackHandle);
-}
-
 
 void AEnemy::PlayAttackMontage()
 {
@@ -102,10 +83,6 @@ void AEnemy::PlayAttackMontage()
 	bIsAttackInProgress = true;
 
 	//设置蒙太奇结束委托
-	AttackEndDelegate.BindUObject(this, &AEnemy::OnAttackMontageEnded);
-
-	if(!IsValid(GetMesh()) || !IsValid(GetMesh()->GetAnimInstance())) return;
-	GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(AttackEndDelegate, AttackMontage);
 }
 
 bool AEnemy::InTargetRange(AActor* Target, double Radius)
@@ -114,41 +91,35 @@ bool AEnemy::InTargetRange(AActor* Target, double Radius)
 	return Distance <= Radius;
 }
 
+void AEnemy::UpdateSpeed(float NewSpeed)
+{
+	if (!IsValid(GetCharacterMovement())) return;
+	GetCharacterMovement()->MaxWalkSpeed = NewSpeed;
+}
+
+UBlackboardComponent* AEnemy::GetBlackboardComponent() const
+{
+	AEnemyAIController* EnemyAIController = Cast<AEnemyAIController>(GetController());
+
+	if (!IsValid(EnemyAIController)) return nullptr;
+	return EnemyAIController->GetBlackboardComponent();
+}
+
 /* 受击 */
 void AEnemy::GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter)
 {
 	if (!AttributeComponent->IsDead())
 	{
 		GetHitAnim(Hitter);
-
-		if (!IsValid(EnemyControllerComponent)) return;
-		if(InTargetRange(Hitter, AttackRadius))
-		{
-			EnemyControllerComponent->SetChaseTarget(Hitter);
-			EnemyControllerComponent->SetAttackTarget(Hitter);
-			EnemyControllerComponent->UpdateBehaviorState();
-		}
-		else
-		{
-			EnemyControllerComponent->SetChaseTarget(Hitter);
-			EnemyControllerComponent->UpdateBehaviorState();
-		}
 	}
 	else
 	{
 		DeadAnim(Hitter);
-		if (!IsValid(EnemyControllerComponent)) return;
-		EnemyControllerComponent->UpdateBehaviorState();
 	}
 }
 
 void AEnemy::Die()
 {
-
-	if (IsValid(AttributeComponent))
-	{
-		EnemyControllerComponent->UpdateBehaviorState();
-	}
 
 	SetLifeSpan(5.f);
 
@@ -156,10 +127,6 @@ void AEnemy::Die()
 	GetCharacterMovement()->bUseControllerDesiredRotation = false;
 	bUseControllerRotationYaw = false;
 
-	if (IsValid(EnemyPerception))
-	{
-		EnemyPerception->ClearPerception();
-	}
 
 	if (IsValid(GetCapsuleComponent()))
 	{

@@ -10,6 +10,7 @@ DECLARE_MULTICAST_DELEGATE_TwoParams(FPerceptionUpdated, AActor*, bool);
 
 class AEnemy;
 
+
 UCLASS()
 class XIUXIAN_API UEnemyPerception : public UAIPerceptionComponent
 {
@@ -23,17 +24,13 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	TObjectPtr<AEnemy> CharOwner;
+	//行为树
+	TObjectPtr<AEnemy> Enemy;
+	FTimerHandle CancelChaseHandle;
+
+	void CancelChase();
 
 	UFUNCTION()
 	void HandleTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
 
-
-
-public:
-	//清除
-	void ClearPerception();
-
-	//perception委托实例
-	FPerceptionUpdated PerceptionUpdated;
 };

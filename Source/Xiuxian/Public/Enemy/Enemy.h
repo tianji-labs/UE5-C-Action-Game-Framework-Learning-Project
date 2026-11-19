@@ -8,17 +8,15 @@
 #include"Character/StateType.h"
 #include "Enemy.generated.h"
 
-class UHealthBar;
-class UHealthBarComponent;
 class UAnimMontage;
 class UEnemyPerception;
 class UAISenseConfig_Sight;
 class AAIController;
-class UEnemyControllerComponent;
 class UAttributeComponent;
 class USphereComponent;
 class AWeapon;
 struct FTimerHandle;
+class UBlackboardComponent;
 
 
 UCLASS()
@@ -29,8 +27,6 @@ class XIUXIAN_API AEnemy : public ACharacter , public IGetHitInterface
 public:
 
 	AEnemy();
-	virtual void Tick(float DeltaTime) override;
-
 protected:
 
 	virtual void BeginPlay() override;
@@ -39,10 +35,6 @@ private:
 /* 通用变量 */
 	UPROPERTY()
 	TObjectPtr<AAIController> AIController;
-
-/* AI */
-	UPROPERTY(VisibleAnywhere, Category = "AI")
-	TObjectPtr<UEnemyControllerComponent> EnemyControllerComponent;
 
 /* 感知 */
 	UPROPERTY(VisibleAnywhere, Category = "Perception")
@@ -55,15 +47,15 @@ private:
 	TObjectPtr<USphereComponent> AttackRangeSphere; 
 	UPROPERTY(EditDefaultsOnly, Category = "Attack")
 	TObjectPtr<UAnimMontage> AttackMontage;
-	FTimerHandle AttackHandle;
-	//攻击结束委托
-	FOnMontageEnded AttackEndDelegate;
+
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	double AttackRadius = 170.f;
 	UPROPERTY(VisibleAnywhere, Category = "Observer")
 	bool bIsAttackInProgress;
 
-	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+	UFUNCTION()
+	void AttackRangeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	void AttackRangeEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 	void PlayAttackMontage();
 
 /* 受击 */
@@ -80,12 +72,6 @@ private:
 
 	void DeadAnim(AActor* Hitter);
 
-/* 血条 */
-	UPROPERTY(VisibleAnywhere, Category = "Healthy")
-	TObjectPtr<UHealthBar> HealthBar;
-
-	UPROPERTY(VisibleAnywhere, Category = "Healthy")
-	TObjectPtr<UHealthBarComponent> HealthBarComp;
 /* 属性*/
 	UPROPERTY(VisibleAnywhere, Category = "Attribute")
 	TObjectPtr<UAttributeComponent> AttributeComponent;
@@ -109,10 +95,13 @@ private:
 
 public:
 /* 攻击 */ 
-	void Attack(AActor* Target);
-	void StopAttack();
 	void Die();
 	bool InTargetRange(AActor* Target, double Radius);
+
+/* Speed */
+	void UpdateSpeed(float NewSpeed);
+/* Blackboard */
+	UBlackboardComponent* GetBlackboardComponent() const;
 
 	FORCEINLINE bool IsAttackInProgress() const { return bIsAttackInProgress; }
 	FORCEINLINE EDeathPose GetDeathPose() const { return DeathPose; }

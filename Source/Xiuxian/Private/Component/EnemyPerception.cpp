@@ -2,6 +2,8 @@
 
 
 #include "Component/EnemyPerception.h"
+#include"BehaviorTree/BlackboardComponent.h"
+#include "Enemy/Enemy.h"
 
 void UEnemyPerception::BeginPlay()
 {
@@ -9,18 +11,34 @@ void UEnemyPerception::BeginPlay()
 
 	OnTargetPerceptionUpdated.AddDynamic(this, &UEnemyPerception::HandleTargetPerceptionUpdated);
 
+	Enemy = Cast<AEnemy>(GetOwner());
 }
+
 
 
 void UEnemyPerception::HandleTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 {
 	bool bSensed = Stimulus.WasSuccessfullySensed();
 	
-	PerceptionUpdated.Broadcast(Actor, bSensed);
+	if (Actor->ActorHasTag(FName("Player")) && bSensed)
+	{
+		//目标被感知，取消延迟后追击
+		GetWorld()->GetTimerManager().ClearTimer(CancelChaseHandle);
+		//设置追击相关黑板值
+		Enemy->GetBlackboardComponent()->SetValueAsBool(FName("HasActorTaget"), true);
+		Enemy->GetBlackboardComponent()->SetValueAsObject(FName("ActorTarget"), Actor);
+	}
+	else
+	{
+		//目标丢失，延迟2秒后取消追击
+		GetWorld()->GetTimerManager().SetTimer(CancelChaseHandle, this, &UEnemyPerception::CancelChase, 2.f);
+	}
 	
 }
 
-void UEnemyPerception::ClearPerception()
+void UEnemyPerception::CancelChase()
 {
-	OnTargetPerceptionUpdated.RemoveAll(this);
+	//设置取消追击相关黑板值
+	Enemy->GetBlackboardComponent()->SetValueAsBool(FName("HasActorTaget"), false);
+	Enemy->GetBlackboardComponent()->SetValueAsObject(FName("ActorTarget"), nullptr);
 }
