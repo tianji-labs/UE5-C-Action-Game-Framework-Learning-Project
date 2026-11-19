@@ -30,6 +30,7 @@ void UAttributeComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void UAttributeComponent::HandleTakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
+	if (IsDead()) return;
 	CurrentHealth = FMath::Clamp(CurrentHealth- Damage, 0.f, MaxHealth);
 
 	float HealthPercent = GetHealthBarPercent();

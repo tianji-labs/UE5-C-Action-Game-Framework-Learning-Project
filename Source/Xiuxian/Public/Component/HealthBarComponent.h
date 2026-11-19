@@ -22,8 +22,6 @@ public:
 protected:
 /* Begin */
 	virtual void BeginPlay() override;
-/* EndPlay */
-	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
 /* 组件 */
@@ -34,7 +32,7 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "HealthBar")
 	TWeakObjectPtr<UAttributeComponent> AttributeComponent;
 
-/* 血条UI */
+/* 血条 */
 	UPROPERTY(EditDefaultsOnly, Category = "HealthBar")
 	TSubclassOf<UHealthBarWidget> HealthBarWidgetClass; //蓝图
 	UPROPERTY()
@@ -42,17 +40,9 @@ private:
 
 	void CreateHealthBarWidget();
 
-/* 血条百分比 */
-	bool bIsDead = false;
-
-	float GetHealthyPercent();
-	void SetHealthBarPercent(float Percent);
-
-/* 受伤 */
-	void ReceiveDamage(float Damage);
 	UFUNCTION()
-	void TakeAnyDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
-
+	void HandleHealthBar(float NewHealthPercent);
+	void SetHealthBarPercent(float Percent);
 
 
 

@@ -29,14 +29,13 @@ void UHealthBarComponent::BeginPlay()
 		AttributeComponent = Owner->FindComponentByClass<UAttributeComponent>(); 
 		HealthBar = Owner->FindComponentByClass<UHealthBar>(); //查询引用自身拥有的组件
 
-		Owner->OnTakeAnyDamage.AddDynamic(this,&UHealthBarComponent::TakeAnyDamage);
 	}
 
 	CreateHealthBarWidget(); //先初始化HealthBar
 
 	if(AttributeComponent.IsValid())
 	{
-		AttributeComponent->SetCurrentHealth(AttributeComponent->GetMaxHealth()); //初始化血量
+		AttributeComponent->OnHealthChanged.AddDynamic(this, &UHealthBarComponent::HandleHealthBar); //绑定血量变化委托
 	}
 
 	if (!IsValid(HealthBar)) return;
@@ -44,18 +43,7 @@ void UHealthBarComponent::BeginPlay()
 
 }
 
-void UHealthBarComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
-{
-	//不要return可能跳过销毁
-	if (IsValid(GetOwner()))
-	{
-		GetOwner()->OnTakeAnyDamage.RemoveAll(this);
-	}
-
-	Super::EndPlay(EndPlayReason);
-}
-
-/* 血条UI */
+/* 血条 */
 void UHealthBarComponent::CreateHealthBarWidget()
 {
 	if (!IsValid(HealthBarWidgetClass)) return;
@@ -66,15 +54,19 @@ void UHealthBarComponent::CreateHealthBarWidget()
 	HealthBar->SetWidgetSpace(EWidgetSpace::Screen);
 }
 
-/* 血条百分比 */
-float UHealthBarComponent::GetHealthyPercent()
+void UHealthBarComponent::HandleHealthBar(float NewHealthPercent)
 {
-	float Percent = 100.f;
-	if(AttributeComponent.IsValid())
+	SetHealthBarPercent(NewHealthPercent);
+	if (!AttributeComponent.IsValid()) return;
+	if (AttributeComponent->IsDead())
 	{
-		Percent = AttributeComponent->GetCurrentHealth() / AttributeComponent->GetMaxHealth();
+		HealthBar->SetVisibility(false);
 	}
-	return Percent;
+	else
+	{
+		HealthBar->SetVisibility(true);
+	}
+
 }
 
 void UHealthBarComponent::SetHealthBarPercent(float Percent)
@@ -83,33 +75,3 @@ void UHealthBarComponent::SetHealthBarPercent(float Percent)
 	HealthBarWidget->HealthBar->SetPercent(Percent);
 }
 
-/* 受伤 */
-void UHealthBarComponent::ReceiveDamage(float Damage)
-{
-	if(AttributeComponent.IsValid())
-	{
-		float NewHealth = FMath::Clamp(AttributeComponent->GetCurrentHealth() - Damage, 0.f, AttributeComponent->GetMaxHealth());
-		AttributeComponent->SetCurrentHealth(NewHealth);
-	}
-}
-/* 接收TakeDamge广播*/
-void UHealthBarComponent::TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
-{
-	ReceiveDamage(Damage);
-	float Percent = GetHealthyPercent();
-	SetHealthBarPercent(Percent);
-	if(AttributeComponent.IsValid())
-	{
-		bIsDead = AttributeComponent->IsDead();
-	}
-	
-	if (bIsDead)
-	{
-		HealthBar->SetVisibility(false);
-	}
-	else if(!bIsDead)
-	{
-		HealthBar->SetVisibility(true);
-	}	
-	
-}

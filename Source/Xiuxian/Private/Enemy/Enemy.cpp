@@ -197,13 +197,6 @@ void AEnemy::GetHitAnim(AActor* Hitter)
 	PlaySectionMontage(Section, GetHitMontage);
 }
 
-float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
-	if (!IsValid(AttributeComponent)|| EnemyState==EEnemyState::EES_Dead) return 0.f;
-	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser); //自动广播给TakeAnyDamage
-	return 0.0f;
-}
-
 void AEnemy::DeadAnim(AActor* Hitter)
 {
 	const double Theta = ObtainAngleForAnim(Hitter);

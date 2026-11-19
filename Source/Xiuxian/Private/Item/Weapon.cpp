@@ -112,7 +112,6 @@ void AWeapon::OnBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor
 {
 	FHitResult HitResult;
 
-	UE_LOG(LogTemp, Warning, TEXT("OnBoxBeginOverlap, other actor: %s, Overlapped Component: %s, OtherComponent: %s"), *OtherActor->GetName(), *OverlappedComponent->GetName(), *OtherComp->GetName());
 	//œ»¥¶¿Ì…À∫¶
 	BoxTrace(HitResult);
 

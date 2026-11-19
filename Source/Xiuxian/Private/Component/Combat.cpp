@@ -7,6 +7,7 @@
 #include "Character/Tianji.h"
 #include"Item/Weapon.h"
 #include "Component/AttributeComponent.h"
+#include "Components/CapsuleComponent.h"
 
 
 UCombat::UCombat()
@@ -105,6 +106,11 @@ void UCombat::HandleDeath(AActor* Hitter)
 	ChangeCombatState(EPlayerCombatState::EPCS_Unoccupied);
 	PlayerLifeState = EPlayerLifeState::EPLS_Dead;
 	DeadAnim(Hitter);
+	UCapsuleComponent* CapsuleComp = Tianji->FindComponentByClass<UCapsuleComponent>();
+	if (IsValid(CapsuleComp))
+	{
+		CapsuleComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
 }
 
 void UCombat::DeadAnim(AActor* Hitter)
