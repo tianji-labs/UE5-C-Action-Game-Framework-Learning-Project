@@ -19,6 +19,7 @@ struct FTimerHandle;
 class UBlackboardComponent;
 
 
+
 UCLASS()
 class XIUXIAN_API AEnemy : public ACharacter , public IGetHitInterface
 {
@@ -50,13 +51,12 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	double AttackRadius = 170.f;
-	UPROPERTY(VisibleAnywhere, Category = "Observer")
-	bool bIsAttackInProgress;
 
 	UFUNCTION()
 	void AttackRangeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
 	void AttackRangeEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-	void PlayAttackMontage();
+
 
 /* ÊÜ»÷ */
 	UPROPERTY(EditDefaultsOnly, Category = "GetHit")
@@ -64,13 +64,15 @@ private:
 
 
 	void GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter);
-	void GetHitAnim(AActor* Hitter);
+
 
 /* ËÀÍö */
 	UPROPERTY(EditDefaultsOnly, Category = "Dead")
 	TObjectPtr<UAnimMontage> DeadMontage;
 
-	void DeadAnim(AActor* Hitter);
+/* Ñ²Âß */
+	UPROPERTY(EditAnywhere, Category = "Patrol")
+	TArray<TObjectPtr<AActor>> PatrolTargets;
 
 /* ÊôÐÔ*/
 	UPROPERTY(VisibleAnywhere, Category = "Attribute")
@@ -85,7 +87,7 @@ private:
 	UFUNCTION()
 	void SetWeaponCollidion(FName NotifyName, const FBranchingPointNotifyPayload& BranchingPointPayload);
 /* Í¨ÓÃ */
-	void PlaySectionMontage(FName Section, UAnimMontage* Montage);
+	bool PlaySectionMontage(FName Section, UAnimMontage* Montage);
 	double ObtainAngleForAnim(AActor* Hitter);
 /* ×´Ì¬ */
 	EDeathPose DeathPose = EDeathPose::EDP_DeathBack;
@@ -94,16 +96,20 @@ private:
 	EEnemyState EnemyState = EEnemyState::EES_NoState;
 
 public:
-/* ¹¥»÷ */ 
+//¹¥»÷
+	bool PlayAttackMontage(const FOnMontageEnded& EndDelegate);
+//ÊÜ»÷
+	bool PlayGetHitMontage(AActor* Hitter,const FOnMontageEnded& EndDelegate);
+//ËÀÍö
+	void PlayDeathMontage(AActor* Hitter);
 	void Die();
-	bool InTargetRange(AActor* Target, double Radius);
-
-/* Speed */
+//Ñ²Âß
+	FORCEINLINE TArray<TObjectPtr<AActor>> GetPatrolTargets() const { return PatrolTargets; }
+//ËÙ¶È
 	void UpdateSpeed(float NewSpeed);
-/* Blackboard */
+//ºÚ°å
 	UBlackboardComponent* GetBlackboardComponent() const;
 
-	FORCEINLINE bool IsAttackInProgress() const { return bIsAttackInProgress; }
 	FORCEINLINE EDeathPose GetDeathPose() const { return DeathPose; }
 	FORCEINLINE AWeapon* GetDeafaultWeapon() const { return DeafaultWeapon; }
 	FORCEINLINE EEnemyState GetEnemyState() const { return EnemyState; }

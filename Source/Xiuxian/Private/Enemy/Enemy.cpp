@@ -2,20 +2,20 @@
 
 
 #include "Enemy/Enemy.h"
-//移动组件
+
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/SphereComponent.h"
-//组件
 #include"Components/CapsuleComponent.h"
 #include "Component/EnemyPerception.h"
 #include"Perception/AISenseConfig_Sight.h"
 #include"Component/AttributeComponent.h"
 #include"Component/EnemyAIController.h"
-//武器
+
 #include"Item/Weapon.h"
-//动画
+
 #include"AnimInstance/EnemyAnimInstance.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Animation/AnimInstance.h"
 
 AEnemy::AEnemy()
 {
@@ -64,39 +64,39 @@ void AEnemy::BeginPlay()
 
 }
 
+//攻击范围检测
 void AEnemy::AttackRangeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	if (OtherActor == this) return;
+	if (!GetBlackboardComponent()) return;
+	UE_LOG(LogTemp, Warning, TEXT("In AttackRange, OtherActor:%s"),*OtherActor->GetName());
 	GetBlackboardComponent()->SetValueAsBool(FName("InAttackRange"), true);
 }
 
 void AEnemy::AttackRangeEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
+	if (!GetBlackboardComponent()) return;
 	GetBlackboardComponent()->SetValueAsBool(FName("InAttackRange"), false);
 }
 
-void AEnemy::PlayAttackMontage()
-{
-	//播放攻击蒙太奇
-	if (!IsValid(AttackMontage)) return;
-	PlayAnimMontage(AttackMontage);
 
-	bIsAttackInProgress = true;
 
-	//设置蒙太奇结束委托
-}
-
-bool AEnemy::InTargetRange(AActor* Target, double Radius)
-{
-	float Distance = FVector::Distance(GetActorLocation(), Target->GetActorLocation());
-	return Distance <= Radius;
-}
-
+//修改速度
 void AEnemy::UpdateSpeed(float NewSpeed)
 {
 	if (!IsValid(GetCharacterMovement())) return;
 	GetCharacterMovement()->MaxWalkSpeed = NewSpeed;
 }
 
+//受击时修改黑板值IsGethit
+void AEnemy::GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter)
+{
+	if (!IsValid(GetBlackboardComponent())) return;
+	GetBlackboardComponent()->SetValueAsObject(FName("ActorTarget"), Hitter);
+	GetBlackboardComponent()->SetValueAsBool(FName("IsGetHit"), true);
+}
+
+//获取黑板
 UBlackboardComponent* AEnemy::GetBlackboardComponent() const
 {
 	AEnemyAIController* EnemyAIController = Cast<AEnemyAIController>(GetController());
@@ -105,24 +105,13 @@ UBlackboardComponent* AEnemy::GetBlackboardComponent() const
 	return EnemyAIController->GetBlackboardComponent();
 }
 
-/* 受击 */
-void AEnemy::GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter)
-{
-	if (!AttributeComponent->IsDead())
-	{
-		GetHitAnim(Hitter);
-	}
-	else
-	{
-		DeadAnim(Hitter);
-	}
-}
 
 void AEnemy::Die()
 {
 
 	SetLifeSpan(5.f);
 
+	if (!IsValid(GetCharacterMovement())) return;
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 	GetCharacterMovement()->bUseControllerDesiredRotation = false;
 	bUseControllerRotationYaw = false;
@@ -133,11 +122,29 @@ void AEnemy::Die()
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 
+	if (!IsValid(DeafaultWeapon)) return;
 	DeafaultWeapon->SetBoxNoCollision();
 	DeafaultWeapon->SetLifeSpan(5.f);
 }
 
-void AEnemy::GetHitAnim(AActor* Hitter)
+//播放攻击动画并设置结束委托
+bool AEnemy::PlayAttackMontage(const FOnMontageEnded& EndDelegate)
+{
+	if (!IsValid(AttackMontage)) return false;
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (!IsValid(AnimInstance)) return false;
+
+	if (AnimInstance->Montage_Play(AttackMontage) <= 0.f) return false;
+
+	FOnMontageEnded Delegate = EndDelegate;
+	AnimInstance->Montage_SetEndDelegate(Delegate, AttackMontage);
+
+	return true;
+
+}
+
+bool AEnemy::PlayGetHitMontage(AActor* Hitter, const FOnMontageEnded& EndDelegate)
 {
 
 	const double Theta = ObtainAngleForAnim(Hitter);
@@ -162,9 +169,19 @@ void AEnemy::GetHitAnim(AActor* Hitter)
 	}
 
 	PlaySectionMontage(Section, GetHitMontage);
+
+	//设置动画结束委托
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (!IsValid(AnimInstance)) return false;
+
+	FOnMontageEnded Delegate = EndDelegate;
+	AnimInstance->Montage_SetEndDelegate(Delegate, GetHitMontage);
+
+	return true;
+
 }
 
-void AEnemy::DeadAnim(AActor* Hitter)
+void AEnemy::PlayDeathMontage(AActor* Hitter)
 {
 	const double Theta = ObtainAngleForAnim(Hitter);
 
@@ -239,12 +256,13 @@ void AEnemy::SetWeaponCollidion(FName NotifyName, const FBranchingPointNotifyPay
 	}
 }
 /* 通用 */
-void AEnemy::PlaySectionMontage(FName Section, UAnimMontage* Montage)
+bool AEnemy::PlaySectionMontage(FName Section, UAnimMontage* Montage)
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (!IsValid(AnimInstance) || !IsValid(Montage)) return;
-	AnimInstance->Montage_Play(Montage);
+	if (!IsValid(AnimInstance) || !IsValid(Montage)) return false;
+	if(AnimInstance->Montage_Play(Montage) <= 0.f) return false;
 	AnimInstance->Montage_JumpToSection(Section, Montage);
+	return true;
 }
 
 

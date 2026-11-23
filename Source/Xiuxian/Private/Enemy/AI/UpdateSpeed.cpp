@@ -4,7 +4,7 @@
 #include "Enemy/AI/UpdateSpeed.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
 
-#include "AIController.h"
+#include "Component/EnemyAIController.h"
 #include "Enemy/Enemy.h"
 #include "GameFramework/CharacterMovementComponent.h"
 

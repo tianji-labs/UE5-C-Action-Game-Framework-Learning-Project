@@ -2,6 +2,7 @@
 
 
 #include "Component/EnemyAIController.h"
+#include "BehaviorTree/BehaviorTreeComponent.h"
 
 
 //接管后运行行为树

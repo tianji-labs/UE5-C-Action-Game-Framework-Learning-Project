@@ -25,7 +25,6 @@ void UEnemyPerception::HandleTargetPerceptionUpdated(AActor* Actor, FAIStimulus 
 		//目标被感知，取消延迟后追击
 		GetWorld()->GetTimerManager().ClearTimer(CancelChaseHandle);
 		//设置追击相关黑板值
-		Enemy->GetBlackboardComponent()->SetValueAsBool(FName("HasActorTaget"), true);
 		Enemy->GetBlackboardComponent()->SetValueAsObject(FName("ActorTarget"), Actor);
 	}
 	else
@@ -39,6 +38,5 @@ void UEnemyPerception::HandleTargetPerceptionUpdated(AActor* Actor, FAIStimulus 
 void UEnemyPerception::CancelChase()
 {
 	//设置取消追击相关黑板值
-	Enemy->GetBlackboardComponent()->SetValueAsBool(FName("HasActorTaget"), false);
 	Enemy->GetBlackboardComponent()->SetValueAsObject(FName("ActorTarget"), nullptr);
 }

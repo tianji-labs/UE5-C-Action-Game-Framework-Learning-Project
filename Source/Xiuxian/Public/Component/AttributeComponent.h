@@ -20,6 +20,9 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
+	UFUNCTION()
+	virtual void HandleTakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser);
+
 private:
 
 	//血条
@@ -30,12 +33,6 @@ private:
 	//速度
 	UPROPERTY(EditAnywhere, Category = "Attribute")
 	float MaxSpeed = 600.f;
-
-/* 受伤 */
-
-	UFUNCTION()
-	void HandleTakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser);
-
 
 public:	
 	//血条

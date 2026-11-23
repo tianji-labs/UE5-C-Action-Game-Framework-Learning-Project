@@ -4,6 +4,7 @@
 #include "Kismet/KismetMathLibrary.h"
 
 
+
 UAttributeComponent::UAttributeComponent()
 {
 
@@ -36,6 +37,7 @@ void UAttributeComponent::HandleTakeAnyDamage(AActor* DamagedActor, float Damage
 	float HealthPercent = GetHealthBarPercent();
 
 	OnHealthChanged.Broadcast(HealthPercent);
+	
 }
 
 
