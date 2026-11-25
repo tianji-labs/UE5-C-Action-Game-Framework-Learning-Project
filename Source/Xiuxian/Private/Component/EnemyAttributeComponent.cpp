@@ -10,8 +10,9 @@
 
 void UEnemyAttributeComponent::HandleTakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
-	//扣除生命值
+
 	if (IsDead()) return;
+	//扣除生命值
 	CurrentHealth = FMath::Clamp(CurrentHealth - Damage, 0.f, MaxHealth);
 
 	//若生命值归零，设置黑板值IsDead
@@ -19,8 +20,10 @@ void UEnemyAttributeComponent::HandleTakeAnyDamage(AActor* DamagedActor, float D
 	{
 		AEnemy* Enemy = Cast<AEnemy>(GetOwner());
 		
-		if (!IsValid(Enemy) || !IsValid(Enemy->GetBlackboardComponent())) return;
-		Enemy->GetBlackboardComponent()->SetValueAsBool(FName("IsDead"), true);
+		if (IsValid(Enemy) && IsValid(Enemy->GetBlackboardComponent()))
+		{
+			Enemy->GetBlackboardComponent()->SetValueAsBool(FName("IsDead"), true);
+		}
 	}
 
 	OnEnemyHealthChanged.Broadcast(GetHealthBarPercent());

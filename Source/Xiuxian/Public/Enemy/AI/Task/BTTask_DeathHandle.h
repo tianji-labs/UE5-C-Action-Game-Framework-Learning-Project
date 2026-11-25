@@ -6,9 +6,8 @@
 #include "BehaviorTree/BTTaskNode.h"
 #include "BTTask_DeathHandle.generated.h"
 
-/**
- * 
- */
+class UBehaviorTreeComponent;
+
 UCLASS()
 class XIUXIAN_API UBTTask_DeathHandle : public UBTTaskNode
 {
@@ -20,4 +19,9 @@ protected:
 private:
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	FBlackboardKeySelector TargetActorKey;
+
+	FOnMontageEnded OnDeathMontageEnded;
+	UBehaviorTreeComponent* BehaviorTreeComp = nullptr;
+
+	void OnMontageEnd(UAnimMontage* Montage, bool bInterrupted);
 };

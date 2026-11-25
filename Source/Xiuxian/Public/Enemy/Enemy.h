@@ -104,7 +104,7 @@ public:
 //ÊÜ»÷
 	bool PlayGetHitMontage(AActor* Hitter,const FOnMontageEnded& EndDelegate);
 //ËÀÍö
-	void PlayDeathMontage(AActor* Hitter);
+	bool PlayDeathMontage(AActor* Hitter, const FOnMontageEnded& EndDelegate);
 	void Die();
 //Ñ²Âß
 	FORCEINLINE TArray<TObjectPtr<AActor>> GetPatrolTargets() const { return PatrolTargets; }

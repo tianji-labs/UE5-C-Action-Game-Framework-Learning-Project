@@ -26,6 +26,7 @@ void UHealthBarWidget::InitializeEnemy(AEnemy* Enemy)
 
 void UHealthBarWidget::NativeDestruct()
 {
+	//ÒÆ³ýÎ¯ÍÐ
 	EnemyAttributeComponent->OnEnemyHealthChanged.RemoveAll(this);
 
 	Super::NativeDestruct();
@@ -33,8 +34,6 @@ void UHealthBarWidget::NativeDestruct()
 
 void UHealthBarWidget::HealthChange(float NewHealthPercent)
 {
-	if (NewHealthPercent == 0.f) return;
-
 	if (!IsValid(HealthBar)) return;
 	HealthBar->SetPercent(NewHealthPercent);
 }

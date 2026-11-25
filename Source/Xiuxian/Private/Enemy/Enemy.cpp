@@ -78,8 +78,6 @@ void AEnemy::AttackRangeEndOverlap(UPrimitiveComponent* OverlappedComponent, AAc
 	GetBlackboardComponent()->SetValueAsBool(FName("InAttackRange"), false);
 }
 
-
-
 //修改速度
 void AEnemy::UpdateSpeed(float NewSpeed)
 {
@@ -104,7 +102,6 @@ UBlackboardComponent* AEnemy::GetBlackboardComponent() const
 	return EnemyAIController->GetBlackboardComponent();
 }
 
-
 void AEnemy::Die()
 {
 
@@ -126,7 +123,7 @@ void AEnemy::Die()
 	DeafaultWeapon->SetLifeSpan(5.f);
 }
 
-//播放攻击动画并设置结束委托
+//播放动画并设置结束委托
 bool AEnemy::PlayAttackMontage(const FOnMontageEnded& EndDelegate)
 {
 	if (!IsValid(AttackMontage)) return false;
@@ -167,7 +164,8 @@ bool AEnemy::PlayGetHitMontage(AActor* Hitter, const FOnMontageEnded& EndDelegat
 		Section = FName("FromRight");
 	}
 
-	PlaySectionMontage(Section, GetHitMontage);
+	//播放失败返回false
+	if(!PlaySectionMontage(Section, GetHitMontage)) return false;
 
 	//设置动画结束委托
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -180,7 +178,7 @@ bool AEnemy::PlayGetHitMontage(AActor* Hitter, const FOnMontageEnded& EndDelegat
 
 }
 
-void AEnemy::PlayDeathMontage(AActor* Hitter)
+bool AEnemy::PlayDeathMontage(AActor* Hitter, const FOnMontageEnded& EndDelegate)
 {
 	const double Theta = ObtainAngleForAnim(Hitter);
 
@@ -196,8 +194,16 @@ void AEnemy::PlayDeathMontage(AActor* Hitter)
 		Section = FName("ForBack");
 		DeathPose = EDeathPose::EDP_DeathBack;
 	}
+	//播放失败返回false
+	if (!PlaySectionMontage(Section, DeadMontage)) return false;
 
-	PlaySectionMontage(Section, DeadMontage);
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (!IsValid(AnimInstance)) return false;
+
+	FOnMontageEnded Delegate = EndDelegate;
+	AnimInstance->Montage_SetEndDelegate(Delegate, DeadMontage);
+
+	return true;
 }
 
 double AEnemy::ObtainAngleForAnim(AActor* Hitter)
