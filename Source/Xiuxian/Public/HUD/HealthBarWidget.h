@@ -6,16 +6,28 @@
 #include "Blueprint/UserWidget.h"
 #include "HealthBarWidget.generated.h"
 
-
 class UProgressBar;
+class UEnemyAttributeComponent;
+class AEnemy;
 
 UCLASS()
 class XIUXIAN_API UHealthBarWidget : public UUserWidget
 {
 	GENERATED_BODY()
+
+protected:
+	virtual void NativeOnInitialized() override;
+	virtual void NativeDestruct() override;
+private:
+	TObjectPtr<UEnemyAttributeComponent> EnemyAttributeComponent;
+
+	UFUNCTION()
+	void HealthChange(float NewHealthPercent);
+
 public:
 	UPROPERTY(meta = (Bindwidget))
 	TObjectPtr<UProgressBar> HealthBar;
 
-
+	void InitializeEnemy(AEnemy* Enemy);
+	
 };

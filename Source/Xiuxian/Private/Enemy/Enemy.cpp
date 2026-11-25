@@ -8,9 +8,9 @@
 #include"Components/CapsuleComponent.h"
 #include "Component/EnemyPerception.h"
 #include"Perception/AISenseConfig_Sight.h"
-#include"Component/AttributeComponent.h"
+#include"Component/EnemyAttributeComponent.h"
 #include"Component/EnemyAIController.h"
-
+#include "Component/HealthBarWidgetComponent.h"
 #include"Item/Weapon.h"
 
 #include"AnimInstance/EnemyAnimInstance.h"
@@ -37,13 +37,13 @@ AEnemy::AEnemy()
 	SetDominantSense 把 Sense 设置为主要/主导感知类型
 	*/
 	//属性
-	AttributeComponent = CreateDefaultSubobject<UAttributeComponent>(TEXT("AttributeComp"));
+	EnemyAttributeComponent = CreateDefaultSubobject<UEnemyAttributeComponent>(TEXT("EnemyAttributeComp"));
 	//攻击范围
 	AttackRangeSphere = CreateDefaultSubobject<USphereComponent>(TEXT("AttackRangeSphere"));
 	AttackRangeSphere->SetupAttachment(GetRootComponent());
 	AttackRangeSphere->InitSphereRadius(AttackRadius);
-
-	
+	//UI
+	HealthBarWidgetComponent = CreateDefaultSubobject<UHealthBarWidgetComponent>(TEXT("HealthBarWidgetComponent"));
 }
 
 void AEnemy::BeginPlay()
@@ -69,7 +69,6 @@ void AEnemy::AttackRangeBeginOverlap(UPrimitiveComponent* OverlappedComponent, A
 {
 	if (OtherActor == this) return;
 	if (!GetBlackboardComponent()) return;
-	UE_LOG(LogTemp, Warning, TEXT("In AttackRange, OtherActor:%s"),*OtherActor->GetName());
 	GetBlackboardComponent()->SetValueAsBool(FName("InAttackRange"), true);
 }
 

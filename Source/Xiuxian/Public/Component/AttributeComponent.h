@@ -23,8 +23,6 @@ protected:
 	UFUNCTION()
 	virtual void HandleTakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser);
 
-private:
-
 	//ÑªÌõ
 	UPROPERTY(EditAnywhere, Category = "Attribute")
 	float MaxHealth = 100.f;

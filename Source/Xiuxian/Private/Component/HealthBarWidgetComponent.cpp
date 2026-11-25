@@ -3,6 +3,7 @@
 
 #include "Component/HealthBarWidgetComponent.h"
 #include "HUD/HealthBarWidget.h"
+#include "Enemy/Enemy.h"
 
 void UHealthBarWidgetComponent::BeginPlay()
 {
@@ -15,4 +16,8 @@ void UHealthBarWidgetComponent::BeginPlay()
 	if ( !IsValid(HealthBarWidget)) return;
 	SetWidget(HealthBarWidget); 
 	SetWidgetSpace(EWidgetSpace::Screen);  
+
+	//≥ı ºªØWidget
+	AEnemy* Enemy = Cast<AEnemy>(GetOwner());
+	HealthBarWidget->InitializeEnemy(Enemy);
 }

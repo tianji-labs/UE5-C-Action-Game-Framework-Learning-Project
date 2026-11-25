@@ -40,5 +40,7 @@ void UBTTask_GetHitHandle::OnGetHitMontageEnded(UAnimMontage* Montage, bool bInt
 
 	FinishLatentTask(*BehaviorTreeComp, bInterrupted ? EBTNodeResult::Failed : EBTNodeResult::Succeeded);
 
+	BehaviorTreeComp->GetBlackboardComponent()->SetValueAsBool(FName("IsGetHit"), false);
+
 	BehaviorTreeComp = nullptr;
 }

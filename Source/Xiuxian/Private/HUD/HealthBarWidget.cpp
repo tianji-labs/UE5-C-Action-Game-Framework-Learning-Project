@@ -2,4 +2,41 @@
 
 
 #include "HUD/HealthBarWidget.h"
+#include "Components/ProgressBar.h"
+#include "Component/EnemyAttributeComponent.h"
+#include "Enemy/Enemy.h"
+
+
+void UHealthBarWidget::NativeOnInitialized()
+{
+	Super::NativeOnInitialized();
+}
+
+void UHealthBarWidget::InitializeEnemy(AEnemy* Enemy)
+{	
+	//获取EnemyAttributeComponent
+	if (!IsValid(Enemy)) return;
+	EnemyAttributeComponent = Enemy->FindComponentByClass<UEnemyAttributeComponent>();
+
+	//接收EnemyAttributeComponent的广播
+	if (!IsValid(EnemyAttributeComponent))  return;
+	EnemyAttributeComponent->OnEnemyHealthChanged.AddUniqueDynamic(this, &UHealthBarWidget::HealthChange);
+	HealthBar->SetPercent(EnemyAttributeComponent->GetHealthBarPercent());
+}
+
+void UHealthBarWidget::NativeDestruct()
+{
+	EnemyAttributeComponent->OnEnemyHealthChanged.RemoveAll(this);
+
+	Super::NativeDestruct();
+}
+
+void UHealthBarWidget::HealthChange(float NewHealthPercent)
+{
+	if (NewHealthPercent == 0.f) return;
+
+	if (!IsValid(HealthBar)) return;
+	HealthBar->SetPercent(NewHealthPercent);
+}
+
 

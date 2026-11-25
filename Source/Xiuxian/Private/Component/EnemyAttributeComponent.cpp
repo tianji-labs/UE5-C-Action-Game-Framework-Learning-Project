@@ -7,13 +7,21 @@
 
 #include "Enemy/Enemy.h"
 
+
 void UEnemyAttributeComponent::HandleTakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
-	Super::HandleTakeAnyDamage(DamagedActor, Damage, DamageType, InstigatedBy, DamageCauser);
+	//扣除生命值
+	if (IsDead()) return;
+	CurrentHealth = FMath::Clamp(CurrentHealth - Damage, 0.f, MaxHealth);
 
-	AEnemy* Enemy = Cast<AEnemy>(GetOwner());
-	if (!IsValid(Enemy) || !IsValid(Enemy->GetBlackboardComponent())) return;
-	if (!IsDead()) return;
-	//死亡后设置黑板值IsDead
-	Enemy->GetBlackboardComponent()->SetValueAsBool(FName("IsDead"), true);
+	//若生命值归零，设置黑板值IsDead
+	if (IsDead())
+	{
+		AEnemy* Enemy = Cast<AEnemy>(GetOwner());
+		
+		if (!IsValid(Enemy) || !IsValid(Enemy->GetBlackboardComponent())) return;
+		Enemy->GetBlackboardComponent()->SetValueAsBool(FName("IsDead"), true);
+	}
+
+	OnEnemyHealthChanged.Broadcast(GetHealthBarPercent());
 }

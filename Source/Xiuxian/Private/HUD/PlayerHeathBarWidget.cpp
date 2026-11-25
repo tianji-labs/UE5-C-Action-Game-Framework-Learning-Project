@@ -32,10 +32,6 @@ void UPlayerHeathBarWidget::NativeDestruct()
 
 void UPlayerHeathBarWidget::SetHealthPercent(float Percent)
 {
-	if (HealthBar->GetPercent() == 0.f)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Enemy is dead"));
-		return;
-	}
+	if (HealthBar->GetPercent() == 0.f) return;
 	HealthBar->SetPercent(Percent);
 }

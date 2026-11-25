@@ -12,12 +12,12 @@ class UAnimMontage;
 class UEnemyPerception;
 class UAISenseConfig_Sight;
 class AAIController;
-class UAttributeComponent;
+class UEnemyAttributeComponent;
 class USphereComponent;
 class AWeapon;
 struct FTimerHandle;
 class UBlackboardComponent;
-
+class UHealthBarWidgetComponent;
 
 
 UCLASS()
@@ -76,8 +76,11 @@ private:
 
 /*  Ù–‘*/
 	UPROPERTY(VisibleAnywhere, Category = "Attribute")
-	TObjectPtr<UAttributeComponent> AttributeComponent;
+	TObjectPtr<UEnemyAttributeComponent> EnemyAttributeComponent;
 
+/* UI */
+	UPROPERTY(VisibleAnywhere, Category = "HealthBarWidgetComponent")
+	TObjectPtr<UHealthBarWidgetComponent> HealthBarWidgetComponent;
 /* Œ‰∆˜ */
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	TSubclassOf<AWeapon> WeaponClass;
