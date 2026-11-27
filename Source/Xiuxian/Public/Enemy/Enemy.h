@@ -62,7 +62,6 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "GetHit")
 	TObjectPtr<UAnimMontage> GetHitMontage;
 
-
 	void GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter);
 
 
@@ -93,10 +92,10 @@ private:
 	bool PlaySectionMontage(FName Section, UAnimMontage* Montage);
 	double ObtainAngleForAnim(AActor* Hitter);
 /* ×´Ì¬ */
-	EDeathPose DeathPose = EDeathPose::EDP_DeathBack;
-
-	UPROPERTY(VisibleAnywhere, Category = "Observer")
-	EEnemyState EnemyState = EEnemyState::EES_NoState;
+	EDeathPose DeathPose = EDeathPose::EDP_None;
+/* ÒôÐ§ */
+	UPROPERTY(EditAnywhere, Category = "Sound")
+	TObjectPtr<USoundBase> GetHitSound;
 
 public:
 //¹¥»÷
@@ -115,6 +114,4 @@ public:
 
 	FORCEINLINE EDeathPose GetDeathPose() const { return DeathPose; }
 	FORCEINLINE AWeapon* GetDeafaultWeapon() const { return DeafaultWeapon; }
-	FORCEINLINE EEnemyState GetEnemyState() const { return EnemyState; }
-	FORCEINLINE void SetEnemyState(EEnemyState NewState) { EnemyState = NewState; }
 };

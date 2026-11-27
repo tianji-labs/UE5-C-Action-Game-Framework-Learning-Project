@@ -24,8 +24,6 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Attribute")
 	class UAttributeComponent* AttributeComponent;
 	UPROPERTY(BlueprintReadOnly, Category = "Attribute")
-	EEnemyState EnemyState;
-	UPROPERTY(BlueprintReadOnly, Category = "Attribute")
 	EDeathPose DeathPose;
 	//ÒÆ¶¯×é¼þ
 	UPROPERTY(BlueprintReadOnly, Category = "Movement")

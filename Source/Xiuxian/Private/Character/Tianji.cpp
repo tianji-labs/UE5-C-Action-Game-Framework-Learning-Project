@@ -13,6 +13,7 @@
 #include "GameFramework/SpringArmComponent.h"
 //数学库（计算）
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet/GameplayStatics.h"
 //自
 #include "HUD/StartMenu.h"
 #include "Item/Weapon.h"
@@ -168,14 +169,16 @@ void ATianji::Attack()
 void ATianji::GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter)
 {
 	if (!IsValid(Combat)) return;
-
+	//处理死亡
 	if (IsValid(AttributeComponent) && AttributeComponent->IsDead())
 	{
 		Combat->HandleDeath(Hitter);
-		return;
 	}
-
+	//处理受击
 	Combat->HandleGetHit(Hitter);
+
+	if (!IsValid(GetHitSound)) return;
+	UGameplayStatics::PlaySoundAtLocation(this, GetHitSound, ImpactPoint);
 }
 
 

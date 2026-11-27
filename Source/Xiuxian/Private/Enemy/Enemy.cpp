@@ -12,7 +12,7 @@
 #include"Component/EnemyAIController.h"
 #include "Component/HealthBarWidgetComponent.h"
 #include"Item/Weapon.h"
-
+#include "Kismet/GameplayStatics.h"
 #include"AnimInstance/EnemyAnimInstance.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Animation/AnimInstance.h"
@@ -85,12 +85,17 @@ void AEnemy::UpdateSpeed(float NewSpeed)
 	GetCharacterMovement()->MaxWalkSpeed = NewSpeed;
 }
 
-//受击时修改黑板值IsGethit
+//受击相关
 void AEnemy::GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter)
 {
+
+	//受击时修改黑板值IsGethit
 	if (!IsValid(GetBlackboardComponent())) return;
 	GetBlackboardComponent()->SetValueAsObject(FName("ActorTarget"), Hitter);
 	GetBlackboardComponent()->SetValueAsBool(FName("IsGetHit"), true);
+	//播放受击音效
+	if (!IsValid(GetHitSound)) return;
+	UGameplayStatics::PlaySoundAtLocation(this, GetHitSound, ImpactPoint);
 }
 
 //获取黑板

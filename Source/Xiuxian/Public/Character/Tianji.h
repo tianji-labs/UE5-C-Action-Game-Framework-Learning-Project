@@ -93,6 +93,9 @@ private:
 /* ÊÜ»÷ */
 	void GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter);
 
+/* ÒôÐ§ */
+	UPROPERTY(EditAnywhere, Category = "Sound")
+	TObjectPtr<USoundBase> GetHitSound;
 /* ×´Ì¬ */
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
 	TObjectPtr<UCombat> Combat;
