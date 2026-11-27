@@ -39,4 +39,5 @@ void UEnemyPerception::CancelChase()
 {
 	//设置取消追击相关黑板值
 	Enemy->GetBlackboardComponent()->SetValueAsObject(FName("ActorTarget"), nullptr);
+	OnTrackLoss.Broadcast();
 }

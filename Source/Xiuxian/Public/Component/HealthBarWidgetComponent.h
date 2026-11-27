@@ -7,6 +7,7 @@
 
 class UHealthBarWidget;
 class UEnemyAttributeComponent;
+class UEnemyPerception;
 
 UCLASS()
 class XIUXIAN_API UHealthBarWidgetComponent : public UWidgetComponent
@@ -23,10 +24,15 @@ private:
 	UPROPERTY()
 	TObjectPtr<UHealthBarWidget> HealthBarWidget; //ÊµÀý
 
+	TObjectPtr<AActor> ActorTarget;
+
 	TWeakObjectPtr<UEnemyAttributeComponent> EnemyAttributeComponent;
+	TWeakObjectPtr<UEnemyPerception> EnemyPerception;
 
 	UFUNCTION()
 	void VisibilityHandle(float NewHealthPercent);
+
+	void TrackLossHandle();
 
 
 };

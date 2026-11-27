@@ -7,6 +7,7 @@
 #include "EnemyPerception.generated.h"
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FPerceptionUpdated, AActor*, bool);
+DECLARE_MULTICAST_DELEGATE(FOnTrackLoss);
 
 class AEnemy;
 
@@ -28,9 +29,13 @@ private:
 	TObjectPtr<AEnemy> Enemy;
 	FTimerHandle CancelChaseHandle;
 
+
 	void CancelChase();
 
 	UFUNCTION()
 	void HandleTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
+
+public:
+	FOnTrackLoss OnTrackLoss;
 
 };
