@@ -2,30 +2,42 @@
 
 
 #include "AnimInstance/EnemyAnimInstance.h"
-#include"Enemy/Enemy.h"
-#include"Component/AttributeComponent.h"
 #include"GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+
+#include"Enemy/Enemy.h"
+
 
 void UEnemyAnimInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
 
 	Enemy = Cast<AEnemy>(TryGetPawnOwner());
-	if(IsValid(Enemy))
+
+	if (!Enemy.IsValid())
 	{
-		AttributeComponent = Enemy->FindComponentByClass<UAttributeComponent>();
-		MyCharacterMovement = Enemy->FindComponentByClass<UCharacterMovementComponent>();
+		return;
 	}
+	MyCharacterMovement = Enemy->FindComponentByClass<UCharacterMovementComponent>();
+
 }
 
 void UEnemyAnimInstance::NativeUpdateAnimation(float DeltaTime)
 {
 	Super::NativeUpdateAnimation(DeltaTime);
-	if (MyCharacterMovement)
+
+	//更新Enemy当前的死亡姿势、速度
+	if (!Enemy.IsValid())
 	{
-		Velocity = MyCharacterMovement->Velocity;
-		GroundSpeed = UKismetMathLibrary::VSizeXY(Velocity);
-		DeathPose = Enemy->GetDeathPose();
+		return;
 	}
+	DeathPose = Enemy->GetDeathPose();
+
+	if (!MyCharacterMovement.IsValid())
+	{
+		return;
+	}
+	Velocity = MyCharacterMovement->Velocity;
+
+	GroundSpeed = UKismetMathLibrary::VSizeXY(Velocity);
 }
